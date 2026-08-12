@@ -9,7 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 cord.workspace = true
-napi = "2"
-napi-derive = "2"
+napi = "3"
+napi-derive = "3"
 thorax-frontend.workspace = true
 thorax-ops.workspace = true
