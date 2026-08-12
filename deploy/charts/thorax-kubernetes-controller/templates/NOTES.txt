@@ -1,0 +1,15 @@
+The controller is reconciling namespace {{ .Release.Namespace }}.
+
+The vault-editor, secret-editor, approver, and publisher Roles are intentionally not bound. Bind
+{{ include "thorax-kubernetes-controller.fullname" . }}-vault-editor to vault-binding authors,
+{{ include "thorax-kubernetes-controller.fullname" . }}-secret-editor to projection authors, and
+{{ include "thorax-kubernetes-controller.fullname" . }}-approver to Thorax administrators.
+Bind {{ include "thorax-kubernetes-controller.fullname" . }}-publisher only to identities that may
+write the namespace's ConfigMaps and trigger vault reconciliation.
+
+Thorax identities and projected plaintext live in Kubernetes Secrets. Before using this
+controller, enable Kubernetes Secret encryption at rest (preferably with a KMS provider)
+and restrict etcd backup access.
+
+Create a ThoraxVault and inspect its generated request:
+  kubectl -n {{ .Release.Namespace }} get thoraxvault,thoraxjoinrequest

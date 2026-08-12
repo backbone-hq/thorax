@@ -1,0 +1,41 @@
+# Rust / Cargo build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Note: Cargo.lock is intentionally tracked (this workspace builds binaries).
+
+# Native binding build artifacts (thorax-py / thorax-node)
+*.so
+*.dylib
+*.dll
+*.pyd
+*.node
+__pycache__/
+node_modules/
+
+# Packaged build outputs (wheels + npm tarballs)
+/dist/
+*.tgz
+*.whl
+
+# Local secrets and credentials
+*.key
+*.pem
+.thorax/vault.cord.lock
+.env
+.env.*
+!.env.example
+
+# Pi agent / subagent artifacts
+.pi/
+.pi-subagents/
+
+# Editor / OS cruft
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+
+public/

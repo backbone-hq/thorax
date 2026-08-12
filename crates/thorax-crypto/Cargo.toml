@@ -1,0 +1,24 @@
+[package]
+name = "thorax-crypto"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[dependencies]
+chacha20poly1305.workspace = true
+ed25519-dalek.workspace = true
+hkdf.workspace = true
+hmac.workspace = true
+hpke.workspace = true
+rand.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+thorax-core.workspace = true
+zeroize.workspace = true
+
+[dev-dependencies]
+cord.workspace = true

@@ -1,0 +1,92 @@
+{{- if .Values.admissionPolicy.create }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ include "thorax-kubernetes-controller.admissionPolicyName" . }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE", "DELETE"]
+        resources: ["secrets"]
+        scope: Namespaced
+  matchConditions:
+    - name: exact-controller-service-account
+      expression: >-
+        request.userInfo.username ==
+        {{ printf "system:serviceaccount:%s:%s" .Release.Namespace (include "thorax-kubernetes-controller.serviceAccountName" .) | quote }}
+  variables:
+    - name: prior
+      expression: >-
+        request.operation == 'CREATE' ? object : oldObject
+    - name: target
+      expression: >-
+        request.operation == 'DELETE' ? oldObject : object
+  validations:
+    # Provenance must hold for the pre-mutation object, while every constraint below also
+    # checks the resulting object. Checking only oldObject on UPDATE would let a compromised
+    # controller turn a previously valid projection into a credential-minting request.
+    - expression: >-
+        has(variables.prior.metadata.labels) &&
+        has(variables.prior.metadata.ownerReferences) &&
+        ((('thorax.backbone.dev/managed' in variables.prior.metadata.labels) &&
+          variables.prior.metadata.labels['thorax.backbone.dev/managed'] == 'true' &&
+          variables.prior.metadata.ownerReferences.exists(owner,
+            owner.apiVersion == 'thorax.backbone.dev/v1alpha1' &&
+            owner.kind == 'ThoraxSecret' &&
+            has(owner.controller) && owner.controller)) ||
+         (('thorax.backbone.dev/component' in variables.prior.metadata.labels) &&
+          variables.prior.metadata.labels['thorax.backbone.dev/component'] in ['identity', 'ratchet'] &&
+          variables.prior.metadata.ownerReferences.exists(owner,
+            owner.apiVersion == 'thorax.backbone.dev/v1alpha1' &&
+            owner.kind == 'ThoraxVault' &&
+            has(owner.controller) && owner.controller)))
+      message: the Thorax controller may mutate only owned Thorax projection, identity, or ratchet Secrets
+    - expression: >-
+        has(variables.target.metadata.labels) &&
+        has(variables.target.metadata.ownerReferences) &&
+        ((('thorax.backbone.dev/managed' in variables.target.metadata.labels) &&
+          variables.target.metadata.labels['thorax.backbone.dev/managed'] == 'true' &&
+          variables.target.metadata.ownerReferences.exists(owner,
+            owner.apiVersion == 'thorax.backbone.dev/v1alpha1' && owner.kind == 'ThoraxSecret' &&
+            has(owner.controller) && owner.controller)) ||
+         (('thorax.backbone.dev/component' in variables.target.metadata.labels) &&
+          variables.target.metadata.labels['thorax.backbone.dev/component'] in ['identity', 'ratchet'] &&
+          variables.target.metadata.ownerReferences.exists(owner,
+            owner.apiVersion == 'thorax.backbone.dev/v1alpha1' && owner.kind == 'ThoraxVault' &&
+            has(owner.controller) && owner.controller)))
+      message: the resulting Secret must retain Thorax ownership and provenance
+    - expression: >-
+        variables.target.type != 'kubernetes.io/service-account-token' &&
+        variables.target.type != 'bootstrap.kubernetes.io/token' &&
+        (!has(variables.target.metadata.annotations) ||
+          variables.target.metadata.annotations.all(key,
+            !key.startsWith('kubernetes.io/service-account.'))) &&
+        (!has(variables.target.stringData) || size(variables.target.stringData) == 0)
+      message: the Thorax controller cannot request Kubernetes-generated credentials or use stringData
+    - expression: >-
+        !('thorax.backbone.dev/component' in variables.target.metadata.labels) ||
+        (variables.target.metadata.labels['thorax.backbone.dev/component'] == 'identity' &&
+          variables.target.type == 'Opaque' && has(variables.target.immutable) && variables.target.immutable &&
+          has(variables.target.data) && size(variables.target.data) == 1 && 'master-seed' in variables.target.data) ||
+        (variables.target.metadata.labels['thorax.backbone.dev/component'] == 'ratchet' &&
+          variables.target.type == 'Opaque' && (!has(variables.target.immutable) || !variables.target.immutable) &&
+          has(variables.target.data) && size(variables.target.data) == 4 &&
+          'ratchet.cord' in variables.target.data && 'ratchet.mac' in variables.target.data &&
+          'trusted-root' in variables.target.data && 'user-id' in variables.target.data)
+      message: Thorax identity and ratchet Secrets must retain their exact credential shape
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ include "thorax-kubernetes-controller.admissionPolicyName" . }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+spec:
+  policyName: {{ include "thorax-kubernetes-controller.admissionPolicyName" . }}
+  validationActions: [Deny, Audit]
+{{- end }}

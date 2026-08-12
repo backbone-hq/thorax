@@ -1,0 +1,18 @@
+[package]
+name = "thorax-sdk"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+description = "Native Rust SDK for Thorax: secrets management for humans, agents, and apps."
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+thorax-frontend.workspace = true
+thorax-ops.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

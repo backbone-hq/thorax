@@ -1,0 +1,64 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/backbone-hq/thorax-kubernetes-controller
+  pullPolicy: IfNotPresent
+  tag: ""
+  # Prefer an immutable sha256:... release digest. When set, digest takes precedence
+  # over tag and the rendered Pod never resolves a mutable image reference.
+  digest: ""
+  # Deliberate escape hatch for disposable development clusters only. Release charts
+  # ship with digest populated and production installs fail closed without one.
+  allowMutableTag: false
+
+logLevel: info
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+    ephemeral-storage: 16Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+    ephemeral-storage: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+serviceAccount:
+  create: true
+  name: ""
+
+networkPolicy:
+  # The controller has no inbound API. Deny all ingress by default.
+  create: true
+
+podDisruptionBudget:
+  create: true
+
+admissionPolicy:
+  # Cluster-scoped, but matchConditions constrain it to this release's exact
+  # namespaced service-account username. Requires Kubernetes 1.30+.
+  create: true
+
+# These Roles are deliberately unbound. Bind them only to the human or automation
+# identities that should declare projections, publish vaults, or approve enrollment.
+roles:
+  vaultEditor:
+    create: true
+  secretEditor:
+    create: true
+  approver:
+    create: true
+  publisher:
+    create: true

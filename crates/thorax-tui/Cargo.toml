@@ -1,0 +1,25 @@
+[package]
+name = "thorax-tui"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+ratatui = "0.30.2"
+crossterm = "0.29"
+ratatui-textarea = "0.9.2"
+nucleo-matcher = "0.3"
+zeroize.workspace = true
+thorax-frontend.workspace = true
+thorax-ops.workspace = true
+thorax-update.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

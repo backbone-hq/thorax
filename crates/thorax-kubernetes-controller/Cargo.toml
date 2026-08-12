@@ -1,0 +1,30 @@
+[package]
+name = "thorax-kubernetes-controller"
+version.workspace = true
+edition.workspace = true
+publish = false
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[dependencies]
+clap.workspace = true
+futures.workspace = true
+k8s-openapi.workspace = true
+kube.workspace = true
+libc.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tempfile.workspace = true
+thorax-core.workspace = true
+thorax-crypto.workspace = true
+thorax-frontend.workspace = true
+thorax-kubernetes-api.workspace = true
+thorax-ops.workspace = true
+thorax-store.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+zeroize.workspace = true

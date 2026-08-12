@@ -1,0 +1,27 @@
+[package]
+name = "thorax"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "thorax"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+clap_complete.workspace = true
+thorax-cli.workspace = true
+thorax-frontend.workspace = true
+thorax-run.workspace = true
+thorax-tui.workspace = true
+thorax-update.workspace = true
+
+[dev-dependencies]
+assert_cmd.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true

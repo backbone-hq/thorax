@@ -1,0 +1,23 @@
+[package]
+name = "thorax-core"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[lib]
+name = "thorax_core"
+path = "src/lib.rs"
+
+[features]
+# Exposes `test_support` (deterministic record builders and test identities) to downstream
+# crates' dev-dependencies. Never enabled by production code.
+test-support = []
+
+[dependencies]
+cord.workspace = true
+serde.workspace = true
+thiserror.workspace = true

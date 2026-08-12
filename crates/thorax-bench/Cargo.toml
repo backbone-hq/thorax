@@ -1,0 +1,16 @@
+[package]
+name = "thorax-bench"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[[bin]]
+name = "thorax-bench"
+path = "src/main.rs"
+
+# A standalone scaling harness, not shipped with the product. It builds synthetic vaults of
+# varying size and times the load/validate/read paths, plus a real-Ed25519 verify microbench
+# used to project the crypto component of validation cost. See `cargo run -p thorax-bench --release`.
+[dependencies]
+thorax-core = { workspace = true, features = ["test-support"] }
+thorax-crypto.workspace = true

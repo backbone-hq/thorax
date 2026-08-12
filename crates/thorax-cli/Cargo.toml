@@ -1,0 +1,28 @@
+[package]
+name = "thorax-cli"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+clap.workspace = true
+clap_complete.workspace = true
+cord.workspace = true
+k8s-openapi.workspace = true
+kube.workspace = true
+serde_json.workspace = true
+thorax-frontend.workspace = true
+thorax-kubernetes-api.workspace = true
+thorax-ops.workspace = true
+thorax-update.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+zeroize.workspace = true

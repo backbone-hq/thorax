@@ -1,0 +1,541 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: thoraxvaults.thorax.backbone.dev
+spec:
+  group: thorax.backbone.dev
+  names:
+    kind: ThoraxVault
+    plural: thoraxvaults
+    shortNames:
+    - tvault
+    singular: thoraxvault
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for ThoraxVaultSpec via `CustomResource`
+        properties:
+          spec:
+            properties:
+              identity:
+                properties:
+                  managedSecretName:
+                    maxLength: 253
+                    minLength: 1
+                    type: string
+                required:
+                - managedSecretName
+                type: object
+              source:
+                properties:
+                  configMapRef:
+                    properties:
+                      key:
+                        maxLength: 253
+                        minLength: 1
+                        type: string
+                      name:
+                        maxLength: 253
+                        minLength: 1
+                        type: string
+                    required:
+                    - key
+                    - name
+                    type: object
+                required:
+                - configMapRef
+                type: object
+            required:
+            - identity
+            - source
+            type: object
+          status:
+            nullable: true
+            properties:
+              conditions:
+                items:
+                  description: Condition contains details for one aspect of the current state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              identityUserID:
+                nullable: true
+                type: string
+              joinRequestName:
+                nullable: true
+                type: string
+              trustedRoot:
+                nullable: true
+                type: string
+              vaultRevision:
+                nullable: true
+                type: string
+            type: object
+        required:
+        - spec
+        title: ThoraxVault
+        type: object
+        x-kubernetes-validations:
+        - message: ThoraxVault specs are immutable; replace the object to re-enroll
+          rule: self.spec == oldSelf.spec
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: thoraxsecrets.thorax.backbone.dev
+spec:
+  group: thorax.backbone.dev
+  names:
+    kind: ThoraxSecret
+    plural: thoraxsecrets
+    shortNames:
+    - tsecret
+    singular: thoraxsecret
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for ThoraxSecretSpec via `CustomResource`
+        properties:
+          spec:
+            properties:
+              data:
+                additionalProperties:
+                  properties:
+                    field:
+                      maxLength: 1024
+                      nullable: true
+                      type: string
+                    selector:
+                      description: Canonical Thorax selector syntax, for example `app/prod/db@env=prod`.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                  required:
+                  - selector
+                  type: object
+                maxProperties: 256
+                minProperties: 1
+                type: object
+              failurePolicy:
+                default: Delete
+                enum:
+                - Delete
+                - Retain
+                type: string
+              sourceDeletionPolicy:
+                default: Delete
+                enum:
+                - Delete
+                - Retain
+                type: string
+              template:
+                properties:
+                  metadata:
+                    default: {}
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          maxLength: 4096
+                          type: string
+                        maxProperties: 64
+                        type: object
+                      labels:
+                        additionalProperties:
+                          maxLength: 63
+                          type: string
+                        maxProperties: 64
+                        type: object
+                    type: object
+                  type:
+                    maxLength: 253
+                    minLength: 1
+                    type: string
+                required:
+                - type
+                type: object
+              vaultRef:
+                properties:
+                  name:
+                    maxLength: 253
+                    minLength: 1
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - data
+            - template
+            - vaultRef
+            type: object
+          status:
+            nullable: true
+            properties:
+              conditions:
+                items:
+                  description: Condition contains details for one aspect of the current state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              observedGeneration:
+                format: int64
+                nullable: true
+                type: integer
+              observedVaultRevision:
+                nullable: true
+                type: string
+            type: object
+        required:
+        - spec
+        title: ThoraxSecret
+        type: object
+        x-kubernetes-validations:
+        - message: at least one data mapping is required
+          rule: size(self.spec.data) > 0
+        - message: at most 256 data mappings are allowed
+          rule: size(self.spec.data) <= 256
+        - message: Kubernetes-generated credential types cannot be projected
+          rule: self.spec.template.type != 'kubernetes.io/service-account-token' && self.spec.template.type != 'bootstrap.kubernetes.io/token'
+        - message: basic-auth requires username and password mappings
+          rule: self.spec.template.type != 'kubernetes.io/basic-auth' || ('username' in self.spec.data && 'password' in self.spec.data)
+        - message: TLS requires tls.crt and tls.key mappings
+          rule: self.spec.template.type != 'kubernetes.io/tls' || ('tls.crt' in self.spec.data && 'tls.key' in self.spec.data)
+        - message: dockerconfigjson requires .dockerconfigjson
+          rule: self.spec.template.type != 'kubernetes.io/dockerconfigjson' || '.dockerconfigjson' in self.spec.data
+        - message: ssh-auth requires ssh-privatekey
+          rule: self.spec.template.type != 'kubernetes.io/ssh-auth' || 'ssh-privatekey' in self.spec.data
+        - message: controller-reserved labels are forbidden
+          rule: '!has(self.spec.template.metadata) || !has(self.spec.template.metadata.labels) || self.spec.template.metadata.labels.all(key, !key.startsWith(''thorax.backbone.dev/''))'
+        - message: controller-reserved and service-account annotations are forbidden
+          rule: '!has(self.spec.template.metadata) || !has(self.spec.template.metadata.annotations) || self.spec.template.metadata.annotations.all(key, !key.startsWith(''thorax.backbone.dev/'') && !key.startsWith(''kubernetes.io/service-account.''))'
+        - message: label keys and values exceed the projection limits
+          rule: '!has(self.spec.template.metadata) || !has(self.spec.template.metadata.labels) || self.spec.template.metadata.labels.all(key, size(key) <= 253 && size(self.spec.template.metadata.labels[key]) <= 63)'
+        - message: annotation keys and values exceed the projection limits
+          rule: '!has(self.spec.template.metadata) || !has(self.spec.template.metadata.annotations) || self.spec.template.metadata.annotations.all(key, size(key) <= 253 && size(self.spec.template.metadata.annotations[key]) <= 4096)'
+        - message: every projected data key must use Kubernetes Secret key syntax
+          rule: self.spec.data.all(key, key.matches('^[-._a-zA-Z0-9]+$'))
+        - message: selectors must identify explicit non-empty records
+          rule: self.spec.data.all(key, self.spec.data[key].selector != '')
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: thoraxjoinrequests.thorax.backbone.dev
+spec:
+  group: thorax.backbone.dev
+  names:
+    kind: ThoraxJoinRequest
+    plural: thoraxjoinrequests
+    shortNames:
+    - tjoin
+    singular: thoraxjoinrequest
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for ThoraxJoinRequestSpec via `CustomResource`
+        properties:
+          spec:
+            properties:
+              artifact:
+                description: |-
+                  Base64 of the canonical `JoinCandidateStore` bytes. Mirrored fields above are
+                  reviewable indexes and must match this signed artifact exactly.
+                maxLength: 262144
+                minLength: 1
+                type: string
+              encryptionPublicKey:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              entryPoint:
+                maxLength: 262144
+                nullable: true
+                type: string
+              proof:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              purpose:
+                enum:
+                - Enroll
+                - RestoreTrust
+                type: string
+              requestID:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              signingPublicKey:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              suggestedSelectors:
+                default: []
+                items:
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+                maxItems: 256
+                type: array
+              trustedRoot:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              userID:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              vaultRef:
+                properties:
+                  name:
+                    maxLength: 253
+                    minLength: 1
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - artifact
+            - encryptionPublicKey
+            - proof
+            - purpose
+            - requestID
+            - signingPublicKey
+            - trustedRoot
+            - userID
+            - vaultRef
+            type: object
+          status:
+            nullable: true
+            properties:
+              phase:
+                nullable: true
+                type: string
+            type: object
+        required:
+        - spec
+        title: ThoraxJoinRequest
+        type: object
+        x-kubernetes-validations:
+        - message: join request specs are immutable
+          rule: self.spec == oldSelf.spec
+        - message: Enroll requires an entry point
+          rule: self.spec.purpose != 'Enroll' || has(self.spec.entryPoint)
+        - message: RestoreTrust cannot carry an entry point
+          rule: self.spec.purpose != 'RestoreTrust' || !has(self.spec.entryPoint)
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: thoraxjoinapprovals.thorax.backbone.dev
+spec:
+  group: thorax.backbone.dev
+  names:
+    kind: ThoraxJoinApproval
+    plural: thoraxjoinapprovals
+    shortNames:
+    - tapproval
+    singular: thoraxjoinapproval
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for ThoraxJoinApprovalSpec via `CustomResource`
+        properties:
+          spec:
+            properties:
+              approvedGrants:
+                default: []
+                items:
+                  properties:
+                    read:
+                      properties:
+                        labels:
+                          additionalProperties:
+                            properties:
+                              kind:
+                                enum:
+                                - any
+                                - equals
+                                - in
+                                - absent
+                                type: string
+                              values:
+                                items:
+                                  maxLength: 1024
+                                  type: string
+                                maxItems: 256
+                                type: array
+                            required:
+                            - kind
+                            type: object
+                          type: object
+                        tuple:
+                          properties:
+                            kind:
+                              enum:
+                              - any
+                              - exact
+                              - prefix
+                              type: string
+                            values:
+                              items:
+                                maxLength: 1024
+                                type: string
+                              maxItems: 256
+                              type: array
+                          required:
+                          - kind
+                          type: object
+                      required:
+                      - tuple
+                      type: object
+                  required:
+                  - read
+                  type: object
+                maxItems: 256
+                type: array
+              approvingAdmin:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              artifact:
+                description: Base64 of the canonical `JoinApprovalStore` bytes.
+                maxLength: 262144
+                minLength: 1
+                type: string
+              encryptedBaseline:
+                maxLength: 262144
+                minLength: 1
+                type: string
+              purpose:
+                enum:
+                - Enroll
+                - RestoreTrust
+                type: string
+              replacesUserID:
+                maxLength: 4096
+                nullable: true
+                type: string
+              requestID:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              requestRef:
+                properties:
+                  name:
+                    maxLength: 253
+                    minLength: 1
+                    type: string
+                  uid:
+                    maxLength: 128
+                    minLength: 1
+                    type: string
+                required:
+                - name
+                - uid
+                type: object
+              signature:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              trustedRoot:
+                maxLength: 4096
+                minLength: 1
+                type: string
+              userID:
+                maxLength: 4096
+                minLength: 1
+                type: string
+            required:
+            - approvingAdmin
+            - artifact
+            - encryptedBaseline
+            - purpose
+            - requestID
+            - requestRef
+            - signature
+            - trustedRoot
+            - userID
+            type: object
+        required:
+        - spec
+        title: ThoraxJoinApproval
+        type: object
+        x-kubernetes-validations:
+        - message: join approval specs are immutable
+          rule: self.spec == oldSelf.spec
+        - message: RestoreTrust cannot change grants or replace an identity
+          rule: self.spec.purpose != 'RestoreTrust' || ((!has(self.spec.approvedGrants) || size(self.spec.approvedGrants) == 0) && !has(self.spec.replacesUserID))
+    served: true
+    storage: true

@@ -1,0 +1,24 @@
+[package]
+name = "thorax-kubernetes-api"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+
+[dependencies]
+base64.workspace = true
+cord.workspace = true
+k8s-openapi.workspace = true
+kube.workspace = true
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+thorax-core.workspace = true
+thorax-frontend.workspace = true
+
+[dev-dependencies]
+serde_yaml.workspace = true

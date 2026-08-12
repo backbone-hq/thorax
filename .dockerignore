@@ -1,0 +1,8 @@
+# The controller build context is an allow-list. In particular, local vaults,
+# credentials, Git metadata, documentation, and release artifacts can never be sent to
+# a remote BuildKit daemon by an accidental broad COPY.
+**
+!Cargo.toml
+!Cargo.lock
+!crates/
+!crates/**

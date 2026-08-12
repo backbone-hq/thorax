@@ -1,0 +1,40 @@
+{
+  "name": "@backbone-hq/thorax",
+  "version": "0.0.0-development",
+  "description": "Native Node.js SDK for Thorax: secrets management for humans, agents, and apps.",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/backbone-hq/thorax.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "napi": {
+    "binaryName": "thorax",
+    "targets": [
+      "x86_64-unknown-linux-gnu",
+      "aarch64-unknown-linux-gnu",
+      "x86_64-unknown-linux-musl",
+      "aarch64-unknown-linux-musl",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc",
+      "aarch64-pc-windows-msvc"
+    ]
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "3.8.5"
+  },
+  "files": [
+    "index.js",
+    "loader.js",
+    "index.d.ts",
+    "thorax.*.node"
+  ]
+}

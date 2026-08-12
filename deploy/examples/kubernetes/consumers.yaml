@@ -1,0 +1,39 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg
+spec:
+  instances: 3
+  managed:
+    roles:
+      - name: app
+        ensure: present
+        login: true
+        passwordSecret:
+          name: pg-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payments
+  template:
+    metadata:
+      labels:
+        app: payments
+    spec:
+      containers:
+        - name: app
+          image: example.invalid/payments:replace-me
+          volumeMounts:
+            - name: database-credentials
+              mountPath: /var/run/secrets/payments-db
+              readOnly: true
+      volumes:
+        - name: database-credentials
+          secret:
+            secretName: pg-app

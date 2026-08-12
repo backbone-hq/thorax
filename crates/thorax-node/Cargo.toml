@@ -1,0 +1,15 @@
+[package]
+name = "thorax-node"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cord.workspace = true
+napi = "2"
+napi-derive = "2"
+thorax-frontend.workspace = true
+thorax-ops.workspace = true

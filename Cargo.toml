@@ -1,0 +1,96 @@
+[workspace]
+members = [
+  "crates/thorax-core",
+  "crates/thorax-crypto",
+  "crates/thorax-store",
+  "crates/thorax-keychain",
+  "crates/thorax-ops",
+  "crates/thorax-frontend",
+  "crates/thorax-sdk",
+  "crates/thorax-cli",
+  "crates/thorax-tui",
+  "crates/thorax-run",
+  "crates/thorax",
+  "crates/thorax-py",
+  "crates/thorax-node",
+  "crates/thorax-bench",
+  "crates/thorax-update",
+  "crates/thorax-kubernetes-api",
+  "crates/thorax-kubernetes-controller",
+]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.92"
+publish = true
+description = "Secrets management for humans, agents, and apps."
+repository = "https://github.com/backbone-hq/thorax"
+homepage = "https://github.com/backbone-hq/thorax"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+cord = "2.0.0"
+serde = { version = "1", features = ["derive"] }
+thiserror = "1"
+chacha20poly1305 = "0.10.1"
+argon2 = "0.5.3"
+assert_cmd = "2.0.17"
+bech32 = "0.11"
+base64 = "0.22"
+qrcode = { version = "0.14", default-features = false }
+clap = { version = "4.5.53", features = ["derive"] }
+clap_complete = "4.5"
+ed25519-dalek = { version = "2.2.0", features = ["rand_core"] }
+hpke = { version = "0.13.0", default-features = false, features = [
+  "alloc",
+  "x25519",
+] }
+hkdf = "0.12.4"
+hmac = "0.12.1"
+rand = "0.9.2"
+rpassword = "7.4.0"
+serde_json = "1.0.145"
+serde_yaml = "0.9"
+sha2 = "0.10.9"
+tempfile = "3.23.0"
+zeroize = { version = "1.8.2", features = ["derive"] }
+kube = { version = "4.2.0", default-features = false, features = ["client", "derive", "runtime", "rustls-tls", "ring"] }
+k8s-openapi = { version = "0.28.0", features = ["v1_32", "schemars"] }
+schemars = "1.2.2"
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "signal", "time"] }
+futures = "0.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+libc = "0.2"
+thorax-core = { version = "1.0.0", path = "crates/thorax-core" }
+thorax-crypto = { version = "1.0.0", path = "crates/thorax-crypto" }
+thorax-store = { version = "1.0.0", path = "crates/thorax-store" }
+thorax-keychain = { version = "1.0.0", path = "crates/thorax-keychain" }
+thorax-ops = { version = "1.0.0", path = "crates/thorax-ops" }
+thorax-frontend = { version = "1.0.0", path = "crates/thorax-frontend" }
+thorax-sdk = { version = "1.0.0", path = "crates/thorax-sdk" }
+thorax-cli = { version = "1.0.0", path = "crates/thorax-cli" }
+thorax-tui = { version = "1.0.0", path = "crates/thorax-tui" }
+thorax-run = { version = "1.0.0", path = "crates/thorax-run" }
+thorax-update = { version = "1.0.0", path = "crates/thorax-update" }
+thorax-kubernetes-api = { version = "1.0.0", path = "crates/thorax-kubernetes-api" }
+ureq = "3"
+indicatif = "0.18.6"
+self-replace = "1.5"
+flate2 = "1.0"
+fs2 = "0.4.3"
+time = { version = "0.3", features = ["parsing"] }
+
+# The Kubernetes controller terminates a cryptographic trust boundary and ships as a
+# standalone process. Keep its container profile separate from FFI release artifacts,
+# where panic=abort would terminate the embedding Python or Node process.
+[profile.controller]
+inherits = "release"
+codegen-units = 1
+incremental = false
+lto = "thin"
+overflow-checks = true
+panic = "abort"
+strip = "symbols"

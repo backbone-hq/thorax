@@ -1,0 +1,114 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "thorax-kubernetes-controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxvaults", "thoraxsecrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxjoinrequests"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxjoinapprovals"]
+    verbs: ["get", "list", "watch", "delete"]
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxvaults/status", "thoraxsecrets/status", "thoraxjoinrequests/status"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "delete"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    resourceNames: [{{ include "thorax-kubernetes-controller.fullname" . | quote }}]
+    verbs: ["get", "update"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["create"]
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "thorax-kubernetes-controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "thorax-kubernetes-controller.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "thorax-kubernetes-controller.fullname" . }}
+{{- if .Values.roles.vaultEditor.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "thorax-kubernetes-controller.fullname" . }}-vault-editor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxvaults"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+{{- end }}
+{{- if .Values.roles.publisher.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "thorax-kubernetes-controller.fullname" . }}-publisher
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxvaults"]
+    verbs: ["get", "patch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "update"]
+{{- end }}
+{{- if .Values.roles.secretEditor.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "thorax-kubernetes-controller.fullname" . }}-secret-editor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxsecrets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+{{- end }}
+{{- if .Values.roles.approver.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "thorax-kubernetes-controller.fullname" . }}-approver
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "thorax-kubernetes-controller.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxvaults", "thoraxjoinrequests"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["thorax.backbone.dev"]
+    resources: ["thoraxjoinapprovals"]
+    verbs: ["get", "create", "delete"]
+{{- end }}

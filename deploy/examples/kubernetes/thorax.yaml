@@ -1,0 +1,32 @@
+apiVersion: thorax.backbone.dev/v1alpha1
+kind: ThoraxVault
+metadata:
+  name: payments
+spec:
+  source:
+    configMapRef:
+      name: thorax-vault-payments
+      key: vault.cord
+  identity:
+    managedSecretName: thorax-identity-payments
+---
+apiVersion: thorax.backbone.dev/v1alpha1
+kind: ThoraxSecret
+metadata:
+  name: pg-app
+spec:
+  vaultRef:
+    name: payments
+  data:
+    username:
+      selector: db/prod/app
+      field: username
+    password:
+      selector: db/prod/app
+  template:
+    type: kubernetes.io/basic-auth
+    metadata:
+      labels:
+        cnpg.io/reload: "true"
+  failurePolicy: Delete
+  sourceDeletionPolicy: Delete

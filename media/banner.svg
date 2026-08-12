@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="100%" height="100%">
+  <!-- Solid Black Background, 1200x300 Banner Format -->
+  <rect width="1200" height="300" fill="#000000"/>
+
+  <!-- Centered perfectly in the 1200x300 canvas (same 256px design box as the Cord banner) -->
+  <g transform="translate(472, 22)">
+    <!--
+      Thorax Mark: two ribs enclosing the heart.
+
+      "Thorax" (Greek: breastplate) is the cage of bone that guards the heart;
+      here, two rib strokes curl around a central point - the secret held safe
+      within. Drawn in the same geometric language as the Cord banner:
+      32px white strokes, 16px corner radii (0px inner corners), round caps,
+      and uniform 24px clearances between every stroke.
+    -->
+
+    <!-- Left rib: tips curl inward toward the center -->
+    <path d="M 100 72
+             L 100 60 A 16 16 0 0 0 84 44
+             L 60 44 A 16 16 0 0 0 44 60
+             L 44 196 A 16 16 0 0 0 60 212
+             L 84 212 A 16 16 0 0 0 100 196
+             L 100 184"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- Right rib: mirrored -->
+    <path d="M 156 72
+             L 156 60 A 16 16 0 0 1 172 44
+             L 196 44 A 16 16 0 0 1 212 60
+             L 212 196 A 16 16 0 0 1 196 212
+             L 172 212 A 16 16 0 0 1 156 196
+             L 156 184"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- The heart: the secret, held -->
+    <circle cx="128" cy="128" r="16" fill="#FFFFFF"/>
+  </g>
+</svg>
