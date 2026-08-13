@@ -125,7 +125,7 @@ jobs:
           touch "/tmp/controller-digests/${IMAGE_DIGEST#sha256:}"
 
       - name: Upload controller image digest
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: thorax-kubernetes-controller-digest-${{ matrix.label }}
           path: /tmp/controller-digests/*
@@ -207,7 +207,7 @@ jobs:
             --destination dist
 
       - name: Upload chart artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: thorax-kubernetes-controller-chart
           path: dist/thorax-kubernetes-controller-*.tgz
@@ -271,7 +271,7 @@ jobs:
           chmod 755 "dist/$ARTIFACT" || true
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.artifact }}
           path: dist/${{ matrix.artifact }}
@@ -321,7 +321,7 @@ jobs:
           args: --locked --release --compatibility pypi --out ../../dist
 
       - name: Upload Python wheel
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: thorax-python-${{ matrix.label }}
           path: dist/*.whl
@@ -380,7 +380,7 @@ jobs:
           chmod 755 "dist/$ARTIFACT"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.artifact }}
           path: dist/${{ matrix.artifact }}
@@ -467,7 +467,7 @@ jobs:
           cp thorax.*.node ../../dist-node/
 
       - name: Upload Node native addon
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: thorax-node-native-${{ matrix.label }}
           path: dist-node/*.node
@@ -509,7 +509,7 @@ jobs:
           THORAX_VERSION: ${{ inputs.version }}
 
       - name: Upload Node package
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: thorax-node-package
           path: dist/*.tgz
