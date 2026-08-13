@@ -47,7 +47,7 @@ Linux and macOS:
 
 <!-- BEGIN PINNED INSTALL: regenerated for each release; do not edit by hand -->
 ```sh
-f="$(mktemp)" && curl -fsSL -o "$f" "https://github.com/backbone-hq/thorax/releases/download/vX.Y.Z/install.sh" && echo "<sha256 from the GitHub Release notes>  $f" | { command -v sha256sum >/dev/null && sha256sum -c - || shasum -a 256 -c -; } && THORAX_VERSION=vX.Y.Z sh "$f"
+f="$(mktemp)" && curl -fsSL -o "$f" "https://github.com/backbone-hq/thorax/releases/download/v1.1.0/install.sh" && echo "2cd1412fcf19b98b785bb844103ec32d1b4c61032bbab4aa06af73c89a8770df  $f" | { command -v sha256sum >/dev/null && sha256sum -c - || shasum -a 256 -c -; } && THORAX_VERSION=v1.1.0 sh "$f"
 ```
 <!-- END PINNED INSTALL -->
 
