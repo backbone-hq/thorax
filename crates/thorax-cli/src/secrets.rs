@@ -142,12 +142,17 @@ pub(crate) fn cmd_list(cli: &CliContext, args: ListArgs) -> Result<ExitCode, Fro
     }
     // Hints go to stderr so stdout stays clean for piping/scripts.
     if not_encrypted > 0 {
-        eprintln!("note: {not_encrypted} secret(s) you're authorized for aren't encrypted to you (unexpected — ask someone who can write them to set them again)");
+        eprintln!(
+            "note: {} you're authorized for aren't encrypted to you (unexpected — ask someone who can write them to set them again)",
+            thorax_frontend::count_noun(not_encrypted, "secret")
+        );
     }
     if !conflicts.is_empty() {
+        let verb = if conflicts.len() == 1 { "is" } else { "are" };
+        let possession = if conflicts.len() == 1 { "has" } else { "have" };
         eprintln!(
-            "note: {} secret(s) are conflicted and have no current value — see thorax conflicts",
-            conflicts.len()
+            "note: {} {verb} conflicted and {possession} no current value — see thorax conflicts",
+            thorax_frontend::count_noun(conflicts.len(), "secret")
         );
     }
     Ok(ExitCode::SUCCESS)

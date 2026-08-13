@@ -61,6 +61,8 @@ impl IdSeed {
 pub enum Invite {
     #[cord(index = 0)]
     V1(InviteV1),
+    #[cord(index = 1)]
+    V2(InviteV2),
 }
 
 /// A self-contained invitation: the recipient identity seed, intended vault root, and the
@@ -70,6 +72,59 @@ pub struct InviteV1 {
     pub master_seed: Bytes,
     pub trusted_root: HashValue,
     pub rollback_baseline: RatchetBaselineV1,
+}
+
+/// V2 makes the first-sync rollback baseline optional. Compact invitations still pin the vault
+/// root and recipient identity, but begin rollback protection from the state observed at claim.
+#[derive(Cord, Clone, Debug, PartialEq, Eq)]
+pub struct InviteV2 {
+    pub master_seed: Bytes,
+    pub trusted_root: HashValue,
+    pub rollback_baseline: Option<RatchetBaselineV1>,
+}
+
+/// Version-independent invitation data consumed by operations and frontends after decoding.
+/// Wire-version branching stops at the codec boundary.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct InvitationMaterial {
+    pub master_seed: Bytes,
+    pub trusted_root: HashValue,
+    pub rollback_baseline: Option<RatchetBaselineV1>,
+}
+
+impl Invite {
+    pub fn into_material(self) -> InvitationMaterial {
+        match self {
+            Invite::V1(invite) => InvitationMaterial {
+                master_seed: invite.master_seed,
+                trusted_root: invite.trusted_root,
+                rollback_baseline: Some(invite.rollback_baseline),
+            },
+            Invite::V2(invite) => InvitationMaterial {
+                master_seed: invite.master_seed,
+                trusted_root: invite.trusted_root,
+                rollback_baseline: invite.rollback_baseline,
+            },
+        }
+    }
+}
+
+impl InvitationMaterial {
+    /// Project normalized material into the current wire format with the requested first-sync
+    /// protection. `include_baseline` cannot invent a baseline omitted by an older input.
+    pub fn to_v2(&self, include_baseline: bool) -> InviteV2 {
+        InviteV2 {
+            master_seed: self.master_seed.clone(),
+            trusted_root: self.trusted_root.clone(),
+            rollback_baseline: include_baseline
+                .then(|| self.rollback_baseline.clone())
+                .flatten(),
+        }
+    }
+
+    pub fn has_rollback_baseline(&self) -> bool {
+        self.rollback_baseline.is_some()
+    }
 }
 
 pub const INVITE_MAGIC: &[u8] = b"thorax-invite\0";

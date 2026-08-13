@@ -383,6 +383,12 @@ pub struct UserInviteArgs {
     /// Replace an existing invitation file. Sensitive output otherwise refuses overwrite.
     #[arg(long)]
     pub(crate) overwrite: bool,
+    /// Omit the first-sync rollback baseline from every output (smaller, but trust-on-first-use).
+    #[arg(long, conflicts_with = "with_rollback_baseline")]
+    pub(crate) compact: bool,
+    /// Include the rollback baseline in every output (text/QR may exceed their size limits).
+    #[arg(long, conflicts_with = "compact")]
+    pub(crate) with_rollback_baseline: bool,
     /// Grant read access on this selector prefix. Can be repeated.
     #[arg(long = "read")]
     pub(crate) read: Vec<String>,

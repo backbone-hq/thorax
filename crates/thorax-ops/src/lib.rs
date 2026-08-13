@@ -14,15 +14,15 @@ pub use thorax_core::{
     selector_subsumes, validate_vault, ActiveSecretV1, Bytes, CryptoProvider, EffectiveState,
     EntryPointRecordV1, GrantDeletedRecordV1, GrantId, GrantPermissionV1, GrantRecordV1,
     GroupDeletedRecordV1, GroupId, GroupMemberDeletedRecordV1, GroupMemberId, GroupMemberRecordV1,
-    GroupRecordV1, HashValue, IdSeed, Invite, InviteV1, JoinApprovalV1, JoinCandidateV1,
-    JoinPurposeV1, KeyOrigin, KeyspaceGrantClassV1, KeyspaceLabelMatcherV1, KeyspaceSelectorV1,
-    LabelMatcherV1, ManageKeyspaceGrantV1, PrincipalRefV1, Ratchet, RatchetBaselineV1,
-    RatchetRecordV1, RecipientSlotV1, RecordBodyV1, RecordKey, SealedPayloadV1,
-    SecretDeletedRecordV1, SecretFieldEntryV1, SecretId, SecretLabelV1, SecretRecordV1,
-    SecretSelectorV1, SecretState, SecretValueV1, TupleMatcherV1, UserDeletedRecordV1,
-    UserHandleId, UserHandleRecordV1, UserId, UserRecordV1, ValidationIssue, ValidationReport,
-    ValidationWarning, VaultHandleId, VaultHandleRecordV1, VaultRecordV1, VaultRootRecordV1,
-    VaultStore, VaultStoreV1, INVITE_MAGIC, MAX_INVITE_BYTES,
+    GroupRecordV1, HashValue, IdSeed, InvitationMaterial, Invite, InviteV1, InviteV2,
+    JoinApprovalV1, JoinCandidateV1, JoinPurposeV1, KeyOrigin, KeyspaceGrantClassV1,
+    KeyspaceLabelMatcherV1, KeyspaceSelectorV1, LabelMatcherV1, ManageKeyspaceGrantV1,
+    PrincipalRefV1, Ratchet, RatchetBaselineV1, RatchetRecordV1, RecipientSlotV1, RecordBodyV1,
+    RecordKey, SealedPayloadV1, SecretDeletedRecordV1, SecretFieldEntryV1, SecretId, SecretLabelV1,
+    SecretRecordV1, SecretSelectorV1, SecretState, SecretValueV1, TupleMatcherV1,
+    UserDeletedRecordV1, UserHandleId, UserHandleRecordV1, UserId, UserRecordV1, ValidationIssue,
+    ValidationReport, ValidationWarning, VaultHandleId, VaultHandleRecordV1, VaultRecordV1,
+    VaultRootRecordV1, VaultStore, VaultStoreV1, INVITE_MAGIC, MAX_INVITE_BYTES,
 };
 pub use thorax_core::{merge_vaults, ConflictKind, ConflictReport, MergeOutcome, MergeRefusal};
 pub use thorax_crypto::{Crypto, Identity};
@@ -158,6 +158,8 @@ pub enum OpsError {
     ClaimRolledBack,
     #[error("the invitation is for a different vault root")]
     InviteRootMismatch,
+    #[error("a rollback-protected invitation is required to establish trust non-interactively")]
+    InviteRollbackBaselineRequired,
     #[error("no conflict candidate has record hash {0:?}")]
     ConflictCandidateNotFound(HashValue),
     #[error("conflict cannot be resolved: {0}")]
@@ -361,7 +363,7 @@ pub struct RelabelSecretOutput {
 pub struct InviteUserOutput {
     pub user_id: UserId,
     /// The self-contained invite: identity seed, intended root, and pre-invite rollback baseline.
-    pub invite: InviteV1,
+    pub invite: InvitationMaterial,
     pub handle: Option<UserHandleId>,
     pub grants: Vec<GrantId>,
     /// Convergence for the grants carried in the invite: existing secrets re-encrypted so the new
@@ -369,14 +371,15 @@ pub struct InviteUserOutput {
     pub reconcile: ReconcileOutput,
 }
 
-pub type InvitationMaterial = InviteV1;
-
 #[derive(Debug)]
 pub struct ClaimInviteOutput {
     pub user_id: UserId,
     pub trusted_root: HashValue,
     pub stored: KeychainIdentityRef,
     pub report: ValidationReport,
+    /// True when first-sync validation used either the invite baseline or stronger existing local
+    /// rollback state. False is an explicitly compact, trust-on-first-use claim.
+    pub rollback_protected: bool,
 }
 
 /// Shared op scaffolding: the keychain unlock funnel and single-record commit core every

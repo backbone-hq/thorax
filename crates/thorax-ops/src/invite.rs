@@ -1,5 +1,5 @@
 use thorax_core::{
-    validate_vault, HashValue, InviteV1, PrincipalRefV1, Ratchet, RatchetBaselineV1,
+    validate_vault, HashValue, InvitationMaterial, PrincipalRefV1, Ratchet, RatchetBaselineV1,
     RatchetRecordV1,
 };
 use thorax_crypto::{Crypto, Identity};
@@ -14,8 +14,8 @@ use thorax_core::GrantPermissionV1;
 use crate::principals::{ensure_administer, ensure_can_create_permission, normalize_user_handle};
 use crate::trust::has_suspected_rollback;
 use crate::{
-    ensure_no_issues, trusted_root_candidate, ClaimInviteOutput, InvitationMaterial,
-    InviteUserOutput, OpsError, ReconcileOutput, Result, UnlockedSession,
+    ensure_no_issues, trusted_root_candidate, ClaimInviteOutput, InviteUserOutput, OpsError,
+    ReconcileOutput, Result, UnlockedSession,
 };
 
 pub struct PreparedInviteUser {
@@ -26,7 +26,7 @@ pub struct PreparedInviteUser {
 }
 
 impl PreparedInviteUser {
-    pub fn invite(&self) -> &InviteV1 {
+    pub fn invite(&self) -> &InvitationMaterial {
         &self.output.invite
     }
 }
@@ -140,10 +140,10 @@ impl UnlockedSession {
             projected.converge_readers(crypto, admin_identity)?
         };
 
-        let invite = InviteV1 {
+        let invite = InvitationMaterial {
             master_seed: invited.master_seed().to_vec(),
             trusted_root: session.ratchet().trusted_root.clone(),
-            rollback_baseline,
+            rollback_baseline: Some(rollback_baseline),
         };
 
         Ok(PreparedInviteUser {
@@ -209,9 +209,14 @@ pub fn claim_invite_with_keychain(
     // ratchet is stronger); otherwise seed a fresh ratchet from the baseline. A vault rolled
     // back past that seed surfaces as rollback conflicts from the standard checks — and a
     // claim must not proceed into a conflicted vault at all, so it fails closed here.
-    let mut ratchet = match read_ratchet_for_root(paths, &trusted_root)? {
+    let existing_ratchet = read_ratchet_for_root(paths, &trusted_root)?;
+    let rollback_protected = existing_ratchet.is_some() || invitation.has_rollback_baseline();
+    let mut ratchet = match existing_ratchet {
         Some(existing) => existing,
-        None => seed_ratchet_from_baseline(&trusted_root, &invitation.rollback_baseline),
+        None => seed_ratchet_from_optional_baseline(
+            &trusted_root,
+            invitation.rollback_baseline.as_ref(),
+        ),
     };
     let report = validate_vault(&vault, &ratchet, crypto)?;
     if has_suspected_rollback(&report) {
@@ -236,6 +241,7 @@ pub fn claim_invite_with_keychain(
         trusted_root,
         stored,
         report,
+        rollback_protected,
     })
 }
 
@@ -246,6 +252,16 @@ fn seed_ratchet_from_baseline(trusted_root: &HashValue, baseline: &RatchetBaseli
         ratchet.absorb_record(record);
     }
     ratchet
+}
+
+fn seed_ratchet_from_optional_baseline(
+    trusted_root: &HashValue,
+    baseline: Option<&RatchetBaselineV1>,
+) -> Ratchet {
+    match baseline {
+        Some(baseline) => seed_ratchet_from_baseline(trusted_root, baseline),
+        None => Ratchet::new(trusted_root.clone()),
+    }
 }
 
 /// Establish local trust for the vault from an invite *without* storing the identity in a
@@ -273,7 +289,10 @@ pub fn ensure_ratchet_from_invite(
         return Ok(());
     }
 
-    let mut ratchet = seed_ratchet_from_baseline(&trusted_root, &invitation.rollback_baseline);
+    let Some(baseline) = invitation.rollback_baseline.as_ref() else {
+        return Err(OpsError::InviteRollbackBaselineRequired);
+    };
+    let mut ratchet = seed_ratchet_from_baseline(&trusted_root, baseline);
     let report = validate_vault(&vault, &ratchet, crypto)?;
     if has_suspected_rollback(&report) {
         return Err(OpsError::ClaimRolledBack);
@@ -557,6 +576,8 @@ mod tests {
             carol
                 .invite
                 .rollback_baseline
+                .as_ref()
+                .expect("new invitations carry a full baseline internally")
                 .records
                 .iter()
                 .any(|record| record.key().as_ref() == Some(&alice_key)),
@@ -619,6 +640,52 @@ mod tests {
             matches!(result, Err(OpsError::ClaimRolledBack)),
             "claim must reject a vault rolled back past the invite baseline, got {result:?}"
         );
+    }
+
+    #[test]
+    fn compact_claim_starts_local_rollback_protection_but_ci_requires_a_baseline() {
+        let fixture = ProductionFixture::initialized();
+        let keychain = root_keychain(&fixture);
+        let alice = invite_user_with_keychain(
+            &fixture.paths,
+            &fixture.crypto,
+            &keychain,
+            fixture.root.user_id(),
+            Some("alice".to_string()),
+            vec![],
+        )
+        .unwrap();
+        let mut compact = alice.invite.clone();
+        compact.rollback_baseline = None;
+
+        let claim_paths = fixture
+            .paths
+            .clone()
+            .with_state_dir(fixture._temp.path.join("compact-claim-state"));
+        let recipient_keychain = PassphraseKeychain::new(
+            fixture._temp.path.join("compact-claim-keychain"),
+            thorax_keychain::StaticPassphraseProvider::new("recipient passphrase"),
+        );
+        let claimed = claim_invite_with_keychain(
+            &claim_paths,
+            &fixture.crypto,
+            &recipient_keychain,
+            &compact,
+        )
+        .expect("an interactive compact claim uses trust on first use");
+        assert!(!claimed.rollback_protected);
+        assert!(read_ratchet_for_root(&claim_paths, &claimed.trusted_root)
+            .unwrap()
+            .is_some());
+
+        let ci_paths = fixture
+            .paths
+            .clone()
+            .with_state_dir(fixture._temp.path.join("compact-ci-state"));
+        assert!(matches!(
+            ensure_ratchet_from_invite(&ci_paths, &fixture.crypto, &compact),
+            Err(OpsError::InviteRollbackBaselineRequired)
+        ));
     }
 
     #[test]

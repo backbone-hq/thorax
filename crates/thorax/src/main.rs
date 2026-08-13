@@ -25,8 +25,8 @@ Examples:
   thorax run app/prod -- ./serve               run ./serve with app/prod/* injected
   thorax list                                  see all secrets and your access
   thorax user invite alice --read app \\
-         --invite-file alice.thrx              invite a teammate (read on app/*)
-  thorax claim alice.thrx                      join a vault you were invited to
+         --invite-file alice.thrxi             invite a teammate (read on app/*)
+  thorax claim alice.thrxi                     join a vault you were invited to
   thorax status                                health view: what needs attention
 
 References:

@@ -57,9 +57,11 @@ pub enum FrontendError {
     AmbiguousIdentityBundle,
     #[error("invitation string is malformed or has a bad checksum")]
     InvalidBundleString,
+    #[error("invitation is too large to display as text; use --invite-file instead")]
+    InviteTooLargeForString,
     #[error("not the expected Thorax invitation (prefix {0:?}; invitations are thrx1…)")]
     WrongBundlePrefix(String),
-    #[error("validation failed with {0} issue(s)")]
+    #[error("validation failed; issue count: {0}")]
     ValidationFailed(usize),
     #[error("environment variable {0} must be valid UTF-8")]
     NonUtf8Env(&'static str),
@@ -104,7 +106,7 @@ pub enum FrontendError {
     InvalidEnvName { name: String, reason: &'static str },
     #[error("environment variable {name} is assigned by more than one --secret")]
     DuplicateEnvName { name: String },
-    #[error("environment variable(s) already set: {}", .names.join(", "))]
+    #[error("environment variables already set: {}", .names.join(", "))]
     EnvCollision { names: Vec<String> },
     #[error("secret {selector} cannot be injected as an environment variable: {reason}")]
     SecretNotInjectable {

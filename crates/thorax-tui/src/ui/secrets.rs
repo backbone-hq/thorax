@@ -95,7 +95,7 @@ fn render_facets(model: &Model, frame: &mut Frame, area: Rect) {
         ));
     }
     spans.push(Span::styled(
-        "   ╱ f to change or clear",
+        "   ╱ [f] change or clear",
         Style::new().fg(DIM),
     ));
     frame.render_widget(Paragraph::new(Line::from(spans)), area);
@@ -131,11 +131,11 @@ fn render_tree(model: &mut Model, frame: &mut Frame, area: Rect) {
                 )),
                 Line::from(""),
                 Line::from(Span::styled(
-                    "Press  n  to create your first secret.",
+                    "Press [n] to create your first secret.",
                     Style::new().fg(ACCENT),
                 )),
                 Line::from(Span::styled(
-                    "Press  ?  for all keys.",
+                    "Press [?] for all keys.",
                     Style::new().fg(DIM),
                 )),
             ]
@@ -147,7 +147,7 @@ fn render_tree(model: &mut Model, frame: &mut Frame, area: Rect) {
                     Style::new().fg(DIM),
                 )),
                 Line::from(Span::styled(
-                    "Press  f  to change it.",
+                    "Press [f] to change it.",
                     Style::new().fg(DIM),
                 )),
             ]
@@ -243,7 +243,7 @@ fn render_detail(model: &Model, frame: &mut Frame, area: Rect) {
                     Style::new().fg(DIM),
                 )),
                 Line::from(slashed(
-                    "Then  r  reveal ╱ y  copy ╱ e  edit.",
+                    "Then [r] reveal ╱ [y] copy ╱ [e] edit.",
                     Style::new().fg(DIM),
                 )),
             ]);
@@ -292,7 +292,7 @@ fn render_detail(model: &Model, frame: &mut Frame, area: Rect) {
         (
             Constraint::Length(5),
             Line::from(slashed(
-                "press r to reveal ╱ y to copy",
+                "press [r] to reveal ╱ [y] to copy",
                 Style::new().fg(DIM),
             )),
             " value ".to_string(),

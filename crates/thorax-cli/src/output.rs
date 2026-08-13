@@ -123,7 +123,10 @@ pub(crate) fn print_workspace_report(
         let health = if !valid {
             "needs attention (validation failed)".to_string()
         } else if attention > 0 {
-            format!("needs attention ({attention} item(s))")
+            format!(
+                "needs attention ({})",
+                thorax_frontend::count_noun(attention, "item")
+            )
         } else {
             "ok".to_string()
         };
@@ -131,17 +134,17 @@ pub(crate) fn print_workspace_report(
         println!();
         println!("secrets: {active_secrets} active");
         println!(
-            "access: {} user(s), {} group(s), {} grant(s)",
-            report.effective.users.len(),
-            report.effective.groups.len(),
-            report.effective.grants.len(),
+            "access: {}, {}, {}",
+            thorax_frontend::count_noun(report.effective.users.len(), "user"),
+            thorax_frontend::count_noun(report.effective.groups.len(), "group"),
+            thorax_frontend::count_noun(report.effective.grants.len(), "grant"),
         );
     }
     if !not_encrypted.is_empty() {
         println!();
         println!(
-            "attention: {} secret(s) you're authorized for aren't encrypted to you (unexpected)",
-            not_encrypted.len()
+            "attention: {} you're authorized for aren't encrypted to you (unexpected)",
+            thorax_frontend::count_noun(not_encrypted.len(), "secret")
         );
         println!("  ask someone who can write them to set them again:");
         for selector in &not_encrypted {
@@ -151,7 +154,8 @@ pub(crate) fn print_workspace_report(
     if conflicts > 0 {
         println!();
         println!(
-            "attention: {conflicts} unresolved conflict(s) — these keys have no effective value until resolved; see thorax conflicts"
+            "attention: {} — these keys have no effective value until resolved; see thorax conflicts",
+            thorax_frontend::count_noun(conflicts, "unresolved conflict")
         );
         for conflict in report.effective.conflicted.values() {
             println!(
@@ -205,8 +209,8 @@ pub(crate) fn print_workspace_report(
 pub(crate) fn print_reconcile_notes(reconciled: &ReconcileOutput) {
     if !reconciled.encrypted.is_empty() {
         println!(
-            "encrypted {} secret(s) to the current readers",
-            reconciled.encrypted.len()
+            "encrypted {} to the current readers",
+            thorax_frontend::count_noun(reconciled.encrypted.len(), "secret")
         );
     }
     print_reconcile_warning(reconciled);
@@ -218,8 +222,8 @@ pub(crate) fn print_reconcile_notes(reconciled: &ReconcileOutput) {
 pub(crate) fn print_reconcile_warning(reconciled: &ReconcileOutput) {
     if !reconciled.needs_rotation.is_empty() {
         println!(
-            "note: {} secret(s) could not be encrypted to the new reader because you cannot decrypt them (unexpected — verify your authority)",
-            reconciled.needs_rotation.len()
+            "note: {} could not be encrypted to the new reader because you cannot decrypt them (unexpected — verify your authority)",
+            thorax_frontend::count_noun(reconciled.needs_rotation.len(), "secret")
         );
     }
 }

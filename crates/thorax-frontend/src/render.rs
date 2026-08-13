@@ -6,6 +6,15 @@
 
 use thorax_ops::{HashValue, UserId};
 
+/// Render a count with a regular English noun (for example, `1 secret` / `2 secrets`).
+pub fn count_noun(count: usize, singular: &str) -> String {
+    if count == 1 {
+        format!("1 {singular}")
+    } else {
+        format!("{count} {singular}s")
+    }
+}
+
 /// Lowercase hex encoding of arbitrary bytes.
 pub fn hex_bytes(bytes: &[u8]) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";
@@ -36,4 +45,16 @@ pub fn short_hash(hash: &HashValue) -> String {
 /// First 8 hex chars of a user id.
 pub fn short_user_hex(user: &UserId) -> String {
     short_hash(&user.0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::count_noun;
+
+    #[test]
+    fn count_noun_uses_natural_singular_and_plural_forms() {
+        assert_eq!(count_noun(0, "secret"), "0 secrets");
+        assert_eq!(count_noun(1, "secret"), "1 secret");
+        assert_eq!(count_noun(2, "secret"), "2 secrets");
+    }
 }

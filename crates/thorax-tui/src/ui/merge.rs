@@ -26,7 +26,10 @@ pub(super) fn render_merge(model: &mut Model, frame: &mut Frame, area: Rect) {
         .borders(Borders::ALL)
         .border_style(Style::new().fg(BAD))
         .title(Span::styled(
-            format!(" {} unresolved conflict(s) ", model.merge.len()),
+            format!(
+                " {} ",
+                thorax_frontend::count_noun(model.merge.len(), "unresolved conflict")
+            ),
             Style::new().fg(BAD).add_modifier(Modifier::BOLD),
         ))
         .padding(GUTTER);
@@ -151,7 +154,7 @@ fn render_merge_conflict_detail(model: &Model, frame: &mut Frame, area: Rect) {
         // fail-open alternative (this machine adapts its memory instead).
         body.push(Line::from(slashed(
             if view.acceptable {
-                "↓ onto a candidate for its full details, Enter there to ratify it ╱ a accepts the rollback instead."
+                "↓ onto a candidate for its full details, Enter there to ratify it ╱ [a] accepts the rollback instead."
             } else {
                 "↓ onto a candidate for its full details, Enter there to resolve."
             },
@@ -204,7 +207,7 @@ fn render_merge_candidate_detail(model: &Model, frame: &mut Frame, area: Rect) {
                 if conflict.blocked.is_some() {
                     "an authorized user must resolve this conflict"
                 } else {
-                    "Enter makes this candidate the winner ╱ the other(s) lose"
+                    "Enter makes this candidate the winner ╱ all other candidates lose"
                 },
                 Style::new().fg(DIM),
             )))
@@ -241,7 +244,7 @@ fn render_merge_candidate_detail(model: &Model, frame: &mut Frame, area: Rect) {
             (
                 Constraint::Length(5),
                 Line::from(slashed(
-                    "press r to reveal this conflict's values (all candidates, one countdown)",
+                    "press [r] to reveal this conflict's values (all candidates, one countdown)",
                     Style::new().fg(DIM),
                 )),
                 " value ".to_string(),

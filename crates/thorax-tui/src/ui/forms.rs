@@ -53,17 +53,30 @@ pub(super) fn render_modal(model: &Model, modal: &Modal, frame: &mut Frame, area
 
 fn render_invite_bundle(encoded: &str, frame: &mut Frame, area: Rect) {
     const PANEL_W: u16 = 76;
-    const CONTENT_W: usize = PANEL_W as usize - 4;
-    let bundle_rows = encoded.chars().count().saturating_add(CONTENT_W - 1) / CONTENT_W;
-    let height = 8_u16.saturating_add(bundle_rows as u16);
-    let rect = centered(area, PANEL_W, height);
+    const WARNING: &str = "Share this ONLY over a secure out-of-band channel.";
+    const SEED_NOTE: &str = "It is the new user's private key seed.";
+    const BASELINE_NOTE: &str = "Compact invite: rollback protection begins after claim.";
+    const CLAIM_NOTE: &str = "The recipient runs: thorax claim <invite>  (or pastes it in Claim).";
+    let panel_w = PANEL_W.min(area.width.saturating_sub(2)).max(10);
+    let content_w = panel_w.saturating_sub(4).max(1) as usize;
+    let wrapped_rows =
+        |text: &str| text.chars().count().max(1).saturating_add(content_w - 1) / content_w;
+    let body_rows = wrapped_rows(WARNING)
+        + wrapped_rows(SEED_NOTE)
+        + wrapped_rows(BASELINE_NOTE)
+        + 1
+        + wrapped_rows(encoded)
+        + 1
+        + wrapped_rows(CLAIM_NOTE);
+    let height = (body_rows as u16).saturating_add(2);
+    let rect = centered(area, panel_w, height);
     frame.render_widget(Clear, rect);
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::new().fg(theme::STRUCT))
         .title(" Invite bundle — secret material ")
         .title_bottom(Line::from(slashed(
-            " y copy ╱ Esc close ",
+            " [y] copy ╱ Esc close ",
             Style::default(),
         )))
         .padding(GUTTER);
@@ -71,21 +84,13 @@ fn render_invite_bundle(encoded: &str, frame: &mut Frame, area: Rect) {
     frame.render_widget(block, rect);
 
     let lines = vec![
-        Line::from(slashed(
-            "Share this ONLY over a secure out-of-band channel.",
-            Style::default(),
-        )),
-        Line::from(slashed(
-            "It is the new user's private key seed.",
-            Style::default(),
-        )),
+        Line::from(slashed(WARNING, Style::default())),
+        Line::from(slashed(SEED_NOTE, Style::default())),
+        Line::from(slashed(BASELINE_NOTE, Style::default())),
         Line::raw(""),
         Line::raw(encoded.to_string()),
         Line::raw(""),
-        Line::from(slashed(
-            "The recipient runs: thorax claim <invite>  (or pastes it in Claim).",
-            Style::default(),
-        )),
+        Line::from(slashed(CLAIM_NOTE, Style::default())),
     ];
     frame.render_widget(Paragraph::new(lines).wrap(Wrap { trim: false }), inner);
 }
@@ -100,7 +105,7 @@ fn render_facet_form(model: &Model, focus: usize, frame: &mut Frame, area: Rect)
         .border_style(Style::new().fg(theme::STRUCT))
         .title(" filter ")
         .title_bottom(Line::from(slashed(
-            " ↑↓ key ╱ ←→ value ╱ c clear ╱ Enter done ",
+            " ↑↓ key ╱ ←→ value ╱ [c] clear ╱ Enter done ",
             Style::default(),
         )))
         .padding(GUTTER);
@@ -311,7 +316,11 @@ fn render_grant_form(form: &crate::app::GrantForm, frame: &mut Frame, area: Rect
         .border_style(Style::new().fg(theme::STRUCT))
         .title(" grant access ")
         .title_bottom(Line::from(slashed(
-            " ↑↓ field ╱ ←→ choose ╱ type the keyspace ╱ Enter grant ╱ Esc cancel ",
+            if form.is_admin() {
+                " ↑↓ field ╱ ←→ choose ╱ Enter grant ╱ Esc cancel "
+            } else {
+                " ↑↓ field ╱ ←→ choose ╱ type keyspace ╱ Enter grant ╱ Esc cancel "
+            },
             Style::default(),
         )))
         .padding(GUTTER);
@@ -325,7 +334,7 @@ fn render_grant_form(form: &crate::app::GrantForm, frame: &mut Frame, area: Rect
         .unwrap_or_else(|| "—".to_string());
     let access = GRANT_CLASSES[form.class_idx];
     let keyspace = if form.is_admin() {
-        "(vault-wide)".to_string()
+        "entire vault".to_string()
     } else if form.keyspace.is_empty() {
         "—".to_string()
     } else {
@@ -364,7 +373,12 @@ fn render_grant_form(form: &crate::app::GrantForm, frame: &mut Frame, area: Rect
     let mut lines = vec![
         field_line(0, "Subject", &subject, true),
         field_line(1, "Access", access, true),
-        field_line(2, "Keyspace", &keyspace, false),
+        field_line(
+            2,
+            if form.is_admin() { "Scope" } else { "Keyspace" },
+            &keyspace,
+            false,
+        ),
     ];
     if let Some(err) = &form.error {
         lines.push(Line::raw(""));

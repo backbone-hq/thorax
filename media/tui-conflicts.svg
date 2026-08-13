@@ -15,8 +15,8 @@
 <text x="793.39996" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> [3] Groups </text>
 <text x="903.25" y="30.039999" fill="#ffffff" font-weight="700" xml:space="preserve"> [4] Conflicts </text>
 <text x="16" y="66.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">┌</text>
-<text x="24.45" y="66.04" fill="#ff4a3e" font-weight="700" xml:space="preserve"> 1 unresolved conflict(s) </text>
-<text x="244.15" y="66.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">────────────────────┐</text>
+<text x="24.45" y="66.04" fill="#ff4a3e" font-weight="700" xml:space="preserve"> 1 unresolved conflict </text>
+<text x="218.79999" y="66.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">───────────────────────┐</text>
 <text x="421.59998" y="66.04" fill="#707070" font-weight="400" xml:space="preserve">┌ candidate ───────────────────────────────────────────────────────────┐</text>
 <text x="16" y="84.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
 <text x="32.9" y="84.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">▾ </text>
@@ -104,7 +104,7 @@
 <text x="16" y="336.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
 <text x="413.15" y="336.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
 <text x="421.59998" y="336.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
-<text x="438.5" y="336.04" fill="#707070" font-weight="400" xml:space="preserve">press r to reveal this conflict's values (all candidates, one</text>
+<text x="438.5" y="336.04" fill="#707070" font-weight="400" xml:space="preserve">press [r] to reveal this conflict's values (all candidates, one</text>
 <text x="1021.55" y="336.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="354.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
 <text x="413.15" y="354.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
@@ -138,18 +138,16 @@
 <text x="413.15" y="552.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="570.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">└──────────────────────────────────────────────┘</text>
 <text x="24.45" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ Reveal ]</text>
-<text x="117.399994" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ Resolve ]</text>
+<text x="117.399994" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ Resolve conflict ]</text>
 <text x="16" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">↑↓ move</text>
 <text x="75.149994" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
-<text x="100.5" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">r reveal</text>
-<text x="168.09999" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
-<text x="193.45" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">Enter resolve candidate</text>
-<text x="387.8" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
-<text x="413.15" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">then: git add the vault</text>
-<text x="607.5" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
-<text x="632.85" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">? help</text>
-<text x="683.55" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
-<text x="708.89996" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">q quit</text>
+<text x="100.5" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">[r] reveal</text>
+<text x="185" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="210.34999" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">Enter resolve candidate</text>
+<text x="404.69998" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="430.05" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">[q] quit</text>
+<text x="497.65" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="523" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">[?] help</text>
 <text x="869.44995" y="624.04" fill="#ffb226" font-weight="700" xml:space="preserve">VERIFIED</text>
 <text x="937.05" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
 <text x="962.39996" y="624.04" fill="#ffb226" font-weight="700" xml:space="preserve">UNLOCKED</text>

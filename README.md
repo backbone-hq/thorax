@@ -47,7 +47,7 @@ Linux and macOS:
 
 <!-- BEGIN PINNED INSTALL: regenerated for each release; do not edit by hand -->
 ```sh
-f="$(mktemp)" && curl -fsSL -o "$f" "https://github.com/backbone-hq/thorax/releases/download/v1.0.1/install.sh" && echo "a043acaf894d85edb5cbcd6485bcf3952567e2cfd9fefcfece405202bf3cf3ac  $f" | { command -v sha256sum >/dev/null && sha256sum -c - || shasum -a 256 -c -; } && THORAX_VERSION=v1.0.1 sh "$f"
+f="$(mktemp)" && curl -fsSL -o "$f" "https://github.com/backbone-hq/thorax/releases/download/vX.Y.Z/install.sh" && echo "<sha256 from the GitHub Release notes>  $f" | { command -v sha256sum >/dev/null && sha256sum -c - || shasum -a 256 -c -; } && THORAX_VERSION=vX.Y.Z sh "$f"
 ```
 <!-- END PINNED INSTALL -->
 
@@ -182,13 +182,13 @@ Invite a teammate with scoped authority. The invite is a private capability that
 
 ```sh
 # Admin
-thorax user invite alice --read app/prod --invite-file alice.thrx
+thorax user invite alice --read app/prod --invite-file alice.thrxi
 
 # Alice
-thorax claim alice.thrx
+thorax claim alice.thrxi
 ```
 
-Invites can also be rendered as QR codes. Every invite pins the intended vault root and embeds the rollback baseline needed to reject an older valid checkout on first sync.
+Invites can also be rendered as QR codes. Compact text/QR invites pin the intended vault root and begin rollback protection at claim; `.thrxi` files include the inviter's rollback baseline by default.
 
 Authority can be granted to users or groups:
 

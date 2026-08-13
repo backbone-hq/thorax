@@ -315,7 +315,7 @@ fn invite_grant_group_and_delete_flow_work() {
     let bob_invite_output = thorax(&repo, &keychain)
         .arg("--json")
         .args(["user", "invite", "bob", "--user", "root", "--invite-file"])
-        .arg(temp.path().join("bob.identity.cord"))
+        .arg(temp.path().join("bob.thrxi"))
         .assert()
         .success()
         .get_output()
@@ -454,7 +454,7 @@ fn invite_refuses_terminal_and_claim_onboards_fresh_machine() {
     let repo = temp.path().join("repo");
     let root_keychain = temp.path().join("root").join("keychain");
     let alice_keychain = temp.path().join("alice").join("keychain");
-    let bundle = temp.path().join("alice.bundle");
+    let bundle = temp.path().join("alice.thrxi");
     fs::create_dir_all(&repo).unwrap();
 
     thorax(&repo, &root_keychain).arg("init").assert().success();
@@ -491,6 +491,99 @@ fn invite_refuses_terminal_and_claim_onboards_fresh_machine() {
         .assert()
         .success()
         .stdout("topsecret");
+}
+
+#[test]
+fn large_invite_defaults_to_compact_text_and_full_thrxi_file() {
+    let temp = tempfile::tempdir().unwrap();
+    let repo = temp.path().join("repo");
+    let root_keychain = temp.path().join("root").join("keychain");
+    let alice_keychain = temp.path().join("alice").join("keychain");
+    let bob_keychain = temp.path().join("bob").join("keychain");
+    let bundle = temp.path().join("bob.thrxi");
+    fs::create_dir_all(&repo).unwrap();
+
+    thorax(&repo, &root_keychain).arg("init").assert().success();
+    // Every observed secret contributes a rollback-watermark record to an invitation. Grow the
+    // baseline beyond Bech32m's code-length limit, as happens naturally in a migrated vault.
+    for index in 0..20 {
+        thorax(&repo, &root_keychain)
+            .args([
+                "set",
+                &format!("migrated/secret_{index}"),
+                "--value-unsafe",
+                "value",
+            ])
+            .assert()
+            .success();
+    }
+
+    let stderr = thorax(&repo, &root_keychain)
+        .args([
+            "user",
+            "invite",
+            "full-text",
+            "--print-unsafe",
+            "--with-rollback-baseline",
+        ])
+        .assert()
+        .failure()
+        .get_output()
+        .stderr
+        .clone();
+    assert!(
+        String::from_utf8_lossy(&stderr).contains("too large to display as text"),
+        "unexpected diagnostic: {}",
+        String::from_utf8_lossy(&stderr)
+    );
+    // Encoding failed before commit, so there is no member whose private seed was discarded.
+    thorax(&repo, &root_keychain)
+        .args(["user", "show", "full-text"])
+        .assert()
+        .failure();
+
+    // Text defaults to compact V2, so the same vault now produces a short, claimable string.
+    let output = thorax(&repo, &root_keychain)
+        .args(["user", "invite", "alice", "--print-unsafe"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let output = String::from_utf8(output).unwrap();
+    let compact = output
+        .lines()
+        .find(|line| line.starts_with("thrx1"))
+        .expect("compact invitation string");
+    assert!(compact.len() < 1023);
+    let claim_output = thorax(&repo, &alice_keychain)
+        .arg("--json")
+        .args(["claim", "--invite", compact])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let claimed: Value = serde_json::from_slice(&claim_output).unwrap();
+    assert_eq!(claimed["baseline_checked"].as_bool(), Some(false));
+
+    // A `.thrxi` file defaults to the full rollback baseline and remains claimable.
+    thorax(&repo, &root_keychain)
+        .args(["user", "invite", "bob", "--invite-file"])
+        .arg(&bundle)
+        .assert()
+        .success();
+    let claim_output = thorax(&repo, &bob_keychain)
+        .arg("--json")
+        .arg("claim")
+        .arg(&bundle)
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let claimed: Value = serde_json::from_slice(&claim_output).unwrap();
+    assert_eq!(claimed["baseline_checked"].as_bool(), Some(true));
 }
 
 // A read must not require the workspace lock: `thorax get` only loads and validates the vault
@@ -543,7 +636,7 @@ fn granting_manage_auto_encrypts_to_the_new_manager() {
     let repo = temp.path().join("repo");
     let root_keychain = temp.path().join("root").join("keychain");
     let bob_keychain = temp.path().join("bob").join("keychain");
-    let bundle = temp.path().join("bob.bundle");
+    let bundle = temp.path().join("bob.thrxi");
     fs::create_dir_all(&repo).unwrap();
 
     thorax(&repo, &root_keychain).arg("init").assert().success();
@@ -583,7 +676,7 @@ fn granting_admin_auto_encrypts_to_the_new_admin() {
     let repo = temp.path().join("repo");
     let root_keychain = temp.path().join("root").join("keychain");
     let bob_keychain = temp.path().join("bob").join("keychain");
-    let bundle = temp.path().join("bob.bundle");
+    let bundle = temp.path().join("bob.thrxi");
     fs::create_dir_all(&repo).unwrap();
 
     thorax(&repo, &root_keychain).arg("init").assert().success();
@@ -620,7 +713,7 @@ fn ci_identity_via_env_bundle_reads_without_keychain_or_claim() {
     let temp = tempfile::tempdir().unwrap();
     let repo = temp.path().join("repo");
     let admin_keychain = temp.path().join("admin").join("keychain");
-    let bundle = temp.path().join("ci.bundle");
+    let bundle = temp.path().join("ci.thrxi");
     fs::create_dir_all(&repo).unwrap();
 
     thorax(&repo, &admin_keychain)

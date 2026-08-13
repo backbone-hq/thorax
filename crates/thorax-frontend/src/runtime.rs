@@ -9,7 +9,7 @@ use std::{
 
 use thorax_ops::{
     ensure_ratchet_from_invite, find_workspace, AutoKeychain, Crypto, FixedIdentityProvider,
-    IdentityKeychain, InvitationMaterial, Invite, InviteV1, LockedSession, ManualIdentityKeychain,
+    IdentityKeychain, InvitationMaterial, Invite, LockedSession, ManualIdentityKeychain,
     NoManualIdentityProvider, PassphraseKeychain, StaticPassphraseProvider, UserId, WorkspacePaths,
     INVITE_MAGIC, MAX_INVITE_BYTES,
 };
@@ -257,16 +257,33 @@ pub fn copy_to_clipboard(data: &[u8]) -> Result<(), FrontendError> {
     Err(FrontendError::ClipboardUnavailable)
 }
 
-/// Encode an invite as the pasteable `thrx1…` string (the inverse of [`read_invite`]'s string
-/// form). Used by frontends that produce an invite to display.
-pub fn encode_invite(invite: &InviteV1) -> Result<String, FrontendError> {
-    let bytes = cord::serialize(&Invite::V1(invite.clone()))?;
-    Ok(bundle::encode(&bytes))
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum InviteBaselinePolicy {
+    Include,
+    Omit,
 }
 
-/// Encode an invite as compact cord bytes for writing to a file (`--invite-file`).
-pub fn invite_bytes(invite: &InviteV1) -> Result<Vec<u8>, FrontendError> {
-    let payload = cord::serialize(&Invite::V1(invite.clone()))?;
+fn wire_invite(invite: &InvitationMaterial, policy: InviteBaselinePolicy) -> Invite {
+    Invite::V2(invite.to_v2(matches!(policy, InviteBaselinePolicy::Include)))
+}
+
+/// Encode an invite as the pasteable `thrx1…` string (the inverse of [`read_invite`]'s string
+/// form). Text and QR frontends normally choose [`InviteBaselinePolicy::Omit`].
+pub fn encode_invite(
+    invite: &InvitationMaterial,
+    policy: InviteBaselinePolicy,
+) -> Result<String, FrontendError> {
+    let bytes = cord::serialize(&wire_invite(invite, policy))?;
+    bundle::encode(&bytes).map_err(map_bundle_error)
+}
+
+/// Encode an invite as Cord bytes for writing to a `.thrxi` file. File frontends normally choose
+/// [`InviteBaselinePolicy::Include`].
+pub fn invite_bytes(
+    invite: &InvitationMaterial,
+    policy: InviteBaselinePolicy,
+) -> Result<Vec<u8>, FrontendError> {
+    let payload = cord::serialize(&wire_invite(invite, policy))?;
     let mut bytes = Vec::with_capacity(INVITE_MAGIC.len() + payload.len());
     bytes.extend_from_slice(INVITE_MAGIC);
     bytes.extend(payload);
@@ -276,6 +293,14 @@ pub fn invite_bytes(invite: &InviteV1) -> Result<Vec<u8>, FrontendError> {
         });
     }
     Ok(bytes)
+}
+
+/// Decode a magic-prefixed `.thrxi` artifact into the version-independent internal form.
+pub fn decode_invite_bytes(bytes: &[u8]) -> Result<InvitationMaterial, FrontendError> {
+    let payload = bytes
+        .strip_prefix(INVITE_MAGIC)
+        .ok_or(FrontendError::InvalidBundleString)?;
+    Ok(cord::deserialize::<Invite>(payload)?.into_material())
 }
 
 pub fn read_invite(
@@ -288,19 +313,15 @@ pub fn read_invite(
         (None, Some(path)) => {
             let bytes = thorax_ops::read_file_bounded(&path, MAX_INVITE_BYTES)
                 .map_err(|source| FrontendError::Io { path, source })?;
-            bytes
-                .strip_prefix(INVITE_MAGIC)
-                .ok_or(FrontendError::InvalidBundleString)?
-                .to_vec()
+            return decode_invite_bytes(&bytes);
         }
     };
-    match cord::deserialize::<Invite>(&bytes)? {
-        Invite::V1(invite) => Ok(invite),
-    }
+    Ok(cord::deserialize::<Invite>(&bytes)?.into_material())
 }
 
 fn map_bundle_error(error: bundle::BundleStringError) -> FrontendError {
     match error {
+        bundle::BundleStringError::TooLargeForText => FrontendError::InviteTooLargeForString,
         bundle::BundleStringError::WrongPrefix(prefix) => FrontendError::WrongBundlePrefix(prefix),
         _ => FrontendError::InvalidBundleString,
     }
@@ -309,31 +330,49 @@ fn map_bundle_error(error: bundle::BundleStringError) -> FrontendError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use thorax_ops::{HashValue, RatchetBaselineV1};
+    use thorax_ops::{HashValue, InvitationMaterial, InviteV1, RatchetBaselineV1};
 
-    fn invitation() -> InviteV1 {
-        InviteV1 {
+    fn invitation() -> InvitationMaterial {
+        InvitationMaterial {
             master_seed: vec![7; 32],
             trusted_root: HashValue(vec![9; 32]),
-            rollback_baseline: RatchetBaselineV1 { records: vec![] },
+            rollback_baseline: Some(RatchetBaselineV1 { records: vec![] }),
         }
     }
 
     #[test]
     fn self_contained_invitation_round_trips_as_text() {
         let invite = invitation();
-        let text = encode_invite(&invite).unwrap();
+        let text = encode_invite(&invite, InviteBaselinePolicy::Include).unwrap();
         assert!(text.starts_with("thrx1"));
         assert_eq!(read_invite(Some(text), None).unwrap(), invite);
     }
 
     #[test]
+    fn compact_v2_and_legacy_v1_normalize_to_the_same_internal_type() {
+        let full = invitation();
+        let compact_text = encode_invite(&full, InviteBaselinePolicy::Omit).unwrap();
+        let compact = read_invite(Some(compact_text), None).unwrap();
+        assert_eq!(compact.master_seed, full.master_seed);
+        assert_eq!(compact.trusted_root, full.trusted_root);
+        assert!(!compact.has_rollback_baseline());
+
+        let legacy = Invite::V1(InviteV1 {
+            master_seed: full.master_seed.clone(),
+            trusted_root: full.trusted_root.clone(),
+            rollback_baseline: full.rollback_baseline.clone().unwrap(),
+        });
+        let legacy_text = bundle::encode(&cord::serialize(&legacy).unwrap()).unwrap();
+        assert_eq!(read_invite(Some(legacy_text), None).unwrap(), full);
+    }
+
+    #[test]
     fn invitation_file_has_magic_and_round_trips() {
         let invite = invitation();
-        let bytes = invite_bytes(&invite).unwrap();
+        let bytes = invite_bytes(&invite, InviteBaselinePolicy::Include).unwrap();
         assert!(bytes.starts_with(INVITE_MAGIC));
         let path = std::env::temp_dir().join(format!(
-            "thorax-invite-test-{}-{}.cord",
+            "thorax-invite-test-{}-{}.thrxi",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

@@ -21,7 +21,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "1.0.1"
+version = "1.1.0"
 edition = "2021"
 rust-version = "1.92"
 publish = true
@@ -64,18 +64,18 @@ futures = "0.3"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 libc = "0.2"
-thorax-core = { version = "1.0.1", path = "crates/thorax-core" }
-thorax-crypto = { version = "1.0.1", path = "crates/thorax-crypto" }
-thorax-store = { version = "1.0.1", path = "crates/thorax-store" }
-thorax-keychain = { version = "1.0.1", path = "crates/thorax-keychain" }
-thorax-ops = { version = "1.0.1", path = "crates/thorax-ops" }
-thorax-frontend = { version = "1.0.1", path = "crates/thorax-frontend" }
-thorax-sdk = { version = "1.0.1", path = "crates/thorax-sdk" }
-thorax-cli = { version = "1.0.1", path = "crates/thorax-cli" }
-thorax-tui = { version = "1.0.1", path = "crates/thorax-tui" }
-thorax-run = { version = "1.0.1", path = "crates/thorax-run" }
-thorax-update = { version = "1.0.1", path = "crates/thorax-update" }
-thorax-kubernetes-api = { version = "1.0.1", path = "crates/thorax-kubernetes-api" }
+thorax-core = { version = "1.1.0", path = "crates/thorax-core" }
+thorax-crypto = { version = "1.1.0", path = "crates/thorax-crypto" }
+thorax-store = { version = "1.1.0", path = "crates/thorax-store" }
+thorax-keychain = { version = "1.1.0", path = "crates/thorax-keychain" }
+thorax-ops = { version = "1.1.0", path = "crates/thorax-ops" }
+thorax-frontend = { version = "1.1.0", path = "crates/thorax-frontend" }
+thorax-sdk = { version = "1.1.0", path = "crates/thorax-sdk" }
+thorax-cli = { version = "1.1.0", path = "crates/thorax-cli" }
+thorax-tui = { version = "1.1.0", path = "crates/thorax-tui" }
+thorax-run = { version = "1.1.0", path = "crates/thorax-run" }
+thorax-update = { version = "1.1.0", path = "crates/thorax-update" }
+thorax-kubernetes-api = { version = "1.1.0", path = "crates/thorax-kubernetes-api" }
 ureq = "3"
 indicatif = "0.18.6"
 self-replace = "1.5"

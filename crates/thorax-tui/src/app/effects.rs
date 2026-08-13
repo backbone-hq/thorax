@@ -1,4 +1,4 @@
-use thorax_frontend::{build_keychain_with_passphrase, copy_to_clipboard};
+use thorax_frontend::{build_keychain_with_passphrase, copy_to_clipboard, InviteBaselinePolicy};
 use thorax_ops::{
     init_vault, key_hash, save_identity_with_keychain_labeled, Crypto, Identity, LockedSession,
     UnlockedSession,
@@ -114,8 +114,8 @@ pub fn run_effect(model: &mut Model, effect: Effect) -> Option<Message> {
                 Ok(v) => v,
                 Err(e) => return Some(Message::OpFailed(op_error(e))),
             };
-            // The invitation itself pins the intended root and carries the first-sync rollback
-            // baseline; the TUI uses the same claim path as every other frontend.
+            // The invitation pins the intended root and may carry a first-sync rollback baseline;
+            // the TUI uses the same normalized claim path as every other frontend.
             match thorax_ops::claim_invite_with_keychain(
                 &model.paths,
                 &model.crypto,
@@ -123,6 +123,11 @@ pub fn run_effect(model: &mut Model, effect: Effect) -> Option<Message> {
                 &invite,
             ) {
                 Ok(out) => {
+                    let status = if out.rollback_protected {
+                        "joined vault".to_string()
+                    } else {
+                        "joined vault — compact invite; rollback protection begins now".to_string()
+                    };
                     let _ = thorax_frontend::write_current_user_for_root(
                         &out.trusted_root,
                         &out.user_id,
@@ -139,7 +144,7 @@ pub fn run_effect(model: &mut Model, effect: Effect) -> Option<Message> {
                     // (claim bootstraps trust + identity), so it ends in a full load — which
                     // also promotes to the just-cached identity.
                     model.reload();
-                    Some(Message::OpOk("joined vault".to_string()))
+                    Some(Message::OpOk(status))
                 }
                 Err(e) => Some(Message::OpFailed(op_error(e))),
             }
@@ -201,14 +206,25 @@ pub fn run_effect(model: &mut Model, effect: Effect) -> Option<Message> {
             let Some(session) = model.session.unlocked_mut() else {
                 return Some(Message::OpFailed("session is locked".to_string()));
             };
-            match session.invite_user(&model.crypto, Some(handle.clone()), Vec::new()) {
-                Ok(out) => match thorax_frontend::encode_invite(&out.invite) {
-                    Ok(encoded) => {
-                        model.refresh_from_session();
-                        Some(Message::ShowBundle(encoded))
+            // Prepare and encode before committing. If the invite is too large for the TUI's
+            // text-only handoff, report the CLI file fallback without creating an unusable user.
+            match session.prepare_invite_user(&model.crypto, Some(handle.clone()), Vec::new()) {
+                Ok(prepared) => {
+                    let encoded = match thorax_frontend::encode_invite(
+                        prepared.invite(),
+                        InviteBaselinePolicy::Omit,
+                    ) {
+                        Ok(encoded) => encoded,
+                        Err(e) => return Some(Message::OpFailed(op_error(e))),
+                    };
+                    match session.commit_invite_user(&model.crypto, prepared) {
+                        Ok(_) => {
+                            model.refresh_from_session();
+                            Some(Message::ShowBundle(encoded))
+                        }
+                        Err(e) => Some(Message::OpFailed(op_error(e))),
                     }
-                    Err(e) => Some(Message::OpFailed(op_error(e))),
-                },
+                }
                 Err(e) => Some(Message::OpFailed(op_error(e))),
             }
         }
@@ -314,8 +330,8 @@ pub fn run_effect(model: &mut Model, effect: Effect) -> Option<Message> {
                         "added member".to_string()
                     } else {
                         format!(
-                            "added member ╱ re-encrypted {} secret(s)",
-                            added.reconcile.encrypted.len()
+                            "added member ╱ re-encrypted {}",
+                            thorax_frontend::count_noun(added.reconcile.encrypted.len(), "secret")
                         )
                     }))
                 }
@@ -338,8 +354,11 @@ pub fn run_effect(model: &mut Model, effect: Effect) -> Option<Message> {
                         "granted access".to_string()
                     } else {
                         format!(
-                            "granted access ╱ re-encrypted {} secret(s) to the new reader",
-                            granted.reconcile.encrypted.len()
+                            "granted access ╱ re-encrypted {} to the new reader",
+                            thorax_frontend::count_noun(
+                                granted.reconcile.encrypted.len(),
+                                "secret"
+                            )
                         )
                     }))
                 }

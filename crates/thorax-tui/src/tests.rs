@@ -174,7 +174,11 @@ fn invite_bundle_modal_can_copy_and_release_terminal_selection() {
     let screen = render_to_string(&mut model);
     assert!(screen.contains("Invite bundle"), "{screen}");
     assert!(screen.contains(&encoded), "{screen}");
-    assert!(screen.contains("y copy"), "{screen}");
+    assert!(screen.contains("[y] copy"), "{screen}");
+
+    let narrow = render_to_string_sized(&mut model, 50, 30);
+    assert!(narrow.contains("[y] copy"), "{narrow}");
+    assert!(narrow.contains("thorax claim"), "{narrow}");
 
     assert!(matches!(
         map_key(&model, key(KeyCode::Char('y'))),
@@ -225,6 +229,45 @@ fn parse_selector_handles_tuple_and_labels() {
         project::parse_selector(&project::selector_path(&quoted)).unwrap(),
         quoted
     );
+}
+
+#[test]
+fn administer_copy_names_its_actual_vault_wide_scope() {
+    let (class, scope) = project::permission_columns(&thorax_ops::GrantPermissionV1::Administer);
+    assert_eq!(class, "administer");
+    assert_eq!(scope, "entire vault");
+    assert!(!scope.contains("principal graph"));
+}
+
+#[test]
+fn administer_access_row_keeps_a_gutter_before_its_scope() {
+    use crate::app::AccessTab;
+    use crate::project::{AccessGrant, AccessUser};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let mut model = empty_model(tmp.path());
+    model.workspace_error = None;
+    model.view = View::Access;
+    model.access_tab = AccessTab::Users;
+    model.access.users.push(AccessUser {
+        user_id: thorax_ops::UserId(thorax_ops::HashValue(vec![1; 32])),
+        handle: Some("alice".to_string()),
+        is_root: false,
+        grants: vec![AccessGrant {
+            grant_id: None,
+            class: "administer".to_string(),
+            keyspace: "entire vault".to_string(),
+        }],
+        group_memberships: Vec::new(),
+    });
+    model.access_expanded.insert(format!(
+        "u:{}",
+        thorax_frontend::user_hex(&model.access.users[0].user_id)
+    ));
+
+    let screen = render_to_string(&mut model);
+    assert!(screen.contains("administer  entire vault"), "{screen}");
+    assert!(!screen.contains("administerentire vault"), "{screen}");
 }
 
 #[test]
@@ -414,16 +457,38 @@ fn real_workspace_loads_classifies_reveals_and_guards_binary_edit() {
             thorax_ops::SecretState::ActiveDecryptable
         );
 
+        // Tree navigation follows conventional arrow semantics: repeated Right/Enter remains
+        // expanded, and Left collapses. Clicking still toggles independently.
+        model.selected_row = 0;
+        let root_path = match model.visible_rows().first() {
+            Some(crate::app::Row::Branch { path, .. }) => path.clone(),
+            _ => panic!("the first row should be a namespace"),
+        };
+        update(&mut model, Message::Open);
+        update(&mut model, Message::Open);
+        assert!(model.expanded.contains(&root_path));
+        update(&mut model, Message::Close);
+        assert!(!model.expanded.contains(&root_path));
+
         // Masked by default: the value box shows the reveal hint, not the plaintext.
         expand_all_and_select_leaf(&mut model);
+        model.status.text.clear();
         let screen = render_to_string(&mut model);
         assert!(
-            screen.contains("press r to reveal"),
+            screen.contains("press [r] to reveal"),
             "value box shows the reveal hint while masked"
         );
         assert!(
             !screen.contains("s3cret"),
             "plaintext must not render while masked"
+        );
+        assert!(
+            screen.contains("[r] reveal"),
+            "the footer advertises the actual reveal key"
+        );
+        assert!(
+            !screen.contains("→ open/reveal"),
+            "open must not be mislabeled as reveal"
         );
 
         // On a narrow terminal the access table degrades to single-letter headers instead of
@@ -476,7 +541,7 @@ fn real_workspace_loads_classifies_reveals_and_guards_binary_edit() {
 
         // Warnings are advisory: they render under Verification in warn styling while the clean
         // line stands (a warned vault is still verified — warnings never block).
-        model.health.warnings = vec!["2 record(s) were written by a newer thorax".to_string()];
+        model.health.warnings = vec!["2 records were written by a newer thorax".to_string()];
         update(&mut model, Message::OpenHealth);
         let warned = render_to_string(&mut model);
         assert!(
@@ -484,7 +549,7 @@ fn real_workspace_loads_classifies_reveals_and_guards_binary_edit() {
             "warnings must not displace the clean verification line"
         );
         assert!(
-            warned.contains("! 2 record(s) were written by a newer thorax"),
+            warned.contains("! 2 records were written by a newer thorax"),
             "validation warnings render in the Health modal"
         );
         update(&mut model, Message::CloseModal);
@@ -511,6 +576,34 @@ fn real_workspace_loads_classifies_reveals_and_guards_binary_edit() {
         assert!(model.reveal.is_none());
         let effects = update(&mut model, Message::Open);
         drain(&mut model, effects);
+
+        // Administer applies to the entire vault. Its form does not focus or accept an ignored
+        // keyspace, and the resting access copy names that scope in plain language.
+        update(&mut model, Message::StartGrant);
+        update(&mut model, Message::GrantFormKey(form_key(KeyCode::Down)));
+        for _ in 0..3 {
+            update(&mut model, Message::GrantFormKey(form_key(KeyCode::Right)));
+        }
+        update(&mut model, Message::GrantFormKey(form_key(KeyCode::Down)));
+        let retained_keyspace = match &model.modal {
+            Some(Modal::Grant(form)) => {
+                assert!(form.is_admin());
+                assert_eq!(form.field, 0, "admin form skips the inapplicable keyspace");
+                form.keyspace.clone()
+            }
+            _ => panic!("expected the admin grant form"),
+        };
+        update(
+            &mut model,
+            Message::GrantFormKey(form_key(KeyCode::Char('x'))),
+        );
+        match &model.modal {
+            Some(Modal::Grant(form)) => assert_eq!(form.keyspace, retained_keyspace),
+            _ => panic!("expected the admin grant form"),
+        }
+        let admin_form = render_to_string(&mut model);
+        assert!(admin_form.contains("entire vault"), "{admin_form}");
+        update(&mut model, Message::CloseModal);
         assert!(model.reveal.is_none(), "Open on a leaf must not reveal");
         // `r` reveals; `r` again (toggle) hides.
         let effects = update(&mut model, Message::Reveal);
@@ -755,6 +848,10 @@ fn fuzzy_search_filters_the_keyspace_tree() {
         assert!(
             screen.contains("Enter to act"),
             "the search bar advertises the Enter handoff"
+        );
+        assert!(
+            !screen.contains("[q] quit") && !screen.contains("[?] help"),
+            "search mode must not advertise character keys that type into the query: {screen:?}"
         );
         assert!(
             !screen.contains("╱ /"),
@@ -1264,7 +1361,7 @@ fn merge_tab_appears_for_conflicts_and_resolution_clears_them() {
         // A tie is a real ambiguity in the vault itself: `a` (accept) is refused on its
         // header — no confirm opens, the conflict stays — and the footer never offers it.
         assert!(
-            !screen.contains("a accept the rollback"),
+            !screen.contains("[a] accept the rollback"),
             "a tie must not hint at accept:\n{screen}"
         );
         assert_eq!(model.merge_selected, 0, "the header row is selected");
@@ -1288,7 +1385,7 @@ fn merge_tab_appears_for_conflicts_and_resolution_clears_them() {
         // both candidates' values, one shared countdown — so they can be compared.
         let screen = render_to_string(&mut model);
         assert!(screen.contains("sealed to"), "details missing:\n{screen}");
-        assert!(screen.contains("press r to reveal"), "{screen}");
+        assert!(screen.contains("press [r] to reveal"), "{screen}");
         let reveal = map_key(&model, key(KeyCode::Char('r'))).unwrap();
         drain_with(&mut model, reveal);
         let reveal_state = model
@@ -1398,8 +1495,8 @@ fn accept_rollback_in_place_clears_the_conflict_without_writing() {
         // line only shows while no transient status occupies the footer).
         model.status = crate::app::Status::default();
         let screen = render_to_string(&mut model);
-        assert!(screen.contains("a accept the rollback"), "{screen}");
-        assert!(screen.contains("s set a fresh value"), "{screen}");
+        assert!(screen.contains("[a] accept the rollback"), "{screen}");
+        assert!(screen.contains("[s] set a fresh value"), "{screen}");
 
         let accept = map_key(&model, key(KeyCode::Char('a'))).unwrap();
         assert!(matches!(accept, Message::RequestAcceptRollback));
@@ -1495,8 +1592,8 @@ fn candidateless_rollback_set_opens_prefilled_form() {
         assert!(model.merge[0].candidates.is_empty());
         // The hint names the in-place keys instead of pointing away.
         let blocked = model.merge[0].blocked.clone().unwrap();
-        assert!(blocked.contains("s set a fresh value"), "{blocked}");
-        assert!(blocked.contains("a accept the rollback"), "{blocked}");
+        assert!(blocked.contains("[s] set a fresh value"), "{blocked}");
+        assert!(blocked.contains("[a] accept the rollback"), "{blocked}");
 
         drain_with(&mut model, Message::SwitchView(View::Merge));
         let set_msg = map_key(&model, key(KeyCode::Char('s'))).unwrap();

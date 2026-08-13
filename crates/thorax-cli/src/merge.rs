@@ -117,8 +117,8 @@ pub(crate) fn cmd_merge_driver(
     }
     if !check.conflicts.is_empty() {
         eprintln!(
-            "  {} conflict(s) need an explicit winner (the conflicted keys have no effective value until then):",
-            check.conflicts.len()
+            "  {} need an explicit winner (the conflicted keys have no effective value until then):",
+            thorax_frontend::count_noun(check.conflicts.len(), "conflict")
         );
         for conflict in &check.conflicts {
             eprintln!(

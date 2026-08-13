@@ -795,9 +795,11 @@ impl Model {
                             b.push(ButtonAction::DeleteGrant)
                         }
                         // A user header is selected → grant to them / delete them.
-                        Some(AccessRow::User { .. }) => {
+                        Some(AccessRow::User { idx, .. }) => {
                             b.push(ButtonAction::NewGrant);
-                            b.push(ButtonAction::DeleteUser);
+                            if !self.access.users.get(idx).is_some_and(|user| user.is_root) {
+                                b.push(ButtonAction::DeleteUser);
+                            }
                         }
                         _ => {}
                     }
@@ -1035,6 +1037,13 @@ impl Model {
         }
     }
 
+    /// Expand the selected access principal without making repeated Right/Enter presses collapse it.
+    pub(super) fn expand_access(&mut self) {
+        if let Some(key) = self.selected_access_key() {
+            self.access_expanded.insert(key);
+        }
+    }
+
     /// Collapse the selected access principal.
     pub(super) fn collapse_access(&mut self) {
         if let Some(key) = self.selected_access_key() {
@@ -1133,6 +1142,18 @@ impl Model {
             } else {
                 self.expanded.insert(path);
             }
+        }
+    }
+
+    /// Expand the selected namespace without making repeated Right/Enter presses collapse it.
+    pub(super) fn expand(&mut self) {
+        if self.view != View::Secrets {
+            return;
+        }
+        if let Some(Row::Branch { path, .. }) =
+            self.visible_rows().into_iter().nth(self.selected_row)
+        {
+            self.expanded.insert(path);
         }
     }
 

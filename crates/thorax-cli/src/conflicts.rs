@@ -108,7 +108,10 @@ fn cmd_conflicts_list(cli: &CliContext) -> Result<ExitCode, FrontendError> {
         return Ok(ExitCode::SUCCESS);
     }
 
-    println!("{} unresolved conflict(s)", conflicts.len());
+    println!(
+        "{}",
+        thorax_frontend::count_noun(conflicts.len(), "unresolved conflict")
+    );
     for conflict in &conflicts {
         println!();
         println!(
@@ -216,7 +219,7 @@ fn cmd_conflicts_resolve(
     // Confirm intent before the unlock prompt.
     if !confirm_destructive(
         &format!(
-            "resolve the conflict at {} {}: make \"{}\" the winner (re-signs it at a fresh counter; the other candidate(s) lose)",
+            "resolve the conflict at {} {}: make \"{}\" the winner (re-signs it at a fresh counter; all other candidates lose)",
             record_key_kind(&conflict.key),
             conflict_label(&conflict),
             candidate_summary(body),
@@ -265,7 +268,10 @@ fn cmd_conflicts_resolve(
             resolved.counter,
         );
         if remaining > 0 {
-            println!("{remaining} conflict(s) remain — see thorax conflicts");
+            println!(
+                "{} remain — see thorax conflicts",
+                thorax_frontend::count_noun(remaining, "conflict")
+            );
         } else {
             println!("no conflicts remain");
             println!(
@@ -353,7 +359,10 @@ fn cmd_conflicts_accept(
             },
         );
         if remaining > 0 {
-            println!("{remaining} conflict(s) remain — see thorax conflicts");
+            println!(
+                "{} remain — see thorax conflicts",
+                thorax_frontend::count_noun(remaining, "conflict")
+            );
         } else {
             println!("no conflicts remain");
         }

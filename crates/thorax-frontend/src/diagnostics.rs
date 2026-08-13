@@ -191,6 +191,12 @@ pub fn diagnose(error: &FrontendError) -> Diagnostic {
             "the invitation string is malformed or its checksum failed",
         )
         .with_hint("re-copy the whole thrx1… string, or use the invitation file instead"),
+        FrontendError::InviteTooLargeForString => Diagnostic::new(
+            "invite_too_large_for_string",
+            exit::INVALID_INPUT,
+            "invitation is too large to display as text; use CLI --invite-file instead",
+        )
+        .with_hint("run `thorax user invite <handle> --invite-file <path>`"),
         FrontendError::WrongBundlePrefix(prefix) => Diagnostic::new(
             "invalid_bundle",
             exit::INVALID_INPUT,
@@ -563,6 +569,12 @@ fn diagnose_ops(error: &OpsError) -> Diagnostic {
             "this invitation is for a different vault",
         )
         .with_hint("open the repository named by your inviter; do not claim against this vault"),
+        OpsError::InviteRollbackBaselineRequired => Diagnostic::new(
+            "invite_baseline_required",
+            exit::TAMPERED,
+            "this non-interactive first use requires a rollback-protected invitation",
+        )
+        .with_hint("provision a full `.thrxi` invitation instead of a compact text invitation"),
         OpsError::ConflictCandidateNotFound(hash) => Diagnostic::new(
             "conflict_candidate_not_found",
             exit::INVALID_INPUT,
@@ -900,8 +912,9 @@ pub fn describe_issue(issue: &ValidationIssue) -> String {
 pub fn describe_warning(warning: &ValidationWarning) -> String {
     match warning {
         ValidationWarning::UnknownRecords { count } => format!(
-            "{count} record(s) were written by a newer thorax and are inert for this build \
-             (preserved, not used) — upgrade thorax to read them"
+            "{} were written by a newer thorax and are inert for this build \
+             (preserved, not used) — upgrade thorax to read them",
+            crate::count_noun(*count, "record")
         ),
         ValidationWarning::AmbiguousSigningKey(key) => format!(
             "signing key {} is claimed by more than one attested identity — the key holder \

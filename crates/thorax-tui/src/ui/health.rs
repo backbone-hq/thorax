@@ -95,7 +95,7 @@ pub(super) fn render_health(model: &Model, frame: &mut Frame, area: Rect) {
     let session = if model.unlock_session.is_locked() {
         "  locked — actions will prompt for your passphrase".to_string()
     } else {
-        "  unlocked for this session (press L to lock now)".to_string()
+        "  unlocked for this session (press [L] to lock now)".to_string()
     };
     lines.push(Line::raw(session));
 

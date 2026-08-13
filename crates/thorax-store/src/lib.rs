@@ -1332,7 +1332,7 @@ mod tests {
     #[test]
     fn sensitive_output_is_private_and_refuses_implicit_overwrite() {
         let temp = TestDir::new();
-        let path = temp.path().join("invite.thrx");
+        let path = temp.path().join("invite.thrxi");
         write_private_output(&path, b"first", false).unwrap();
         let error = write_private_output(&path, b"second", false).unwrap_err();
         assert!(matches!(

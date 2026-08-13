@@ -39,7 +39,7 @@ pub(super) fn render_locked(model: &Model, frame: &mut Frame, area: Rect) {
     )));
     lines.push(Line::raw(""));
     lines.push(Line::from(vec![
-        Span::styled("^C", Style::new().fg(ACCENT).add_modifier(Modifier::BOLD)),
+        Span::styled("[q]", Style::new().fg(ACCENT).add_modifier(Modifier::BOLD)),
         Span::styled("  quit", dim),
     ]));
 
@@ -458,7 +458,7 @@ pub(super) fn render_join(model: &Model, frame: &mut Frame, area: Rect) {
                 Style::new().fg(ACCENT).add_modifier(Modifier::BOLD),
             ),
             Span::styled("  paste invite      ", dim),
-            Span::styled("^C", Style::new().fg(ACCENT).add_modifier(Modifier::BOLD)),
+            Span::styled("[q]", Style::new().fg(ACCENT).add_modifier(Modifier::BOLD)),
             Span::styled("  quit", dim),
         ]),
     );
@@ -466,20 +466,21 @@ pub(super) fn render_join(model: &Model, frame: &mut Frame, area: Rect) {
 
 pub(super) fn render_help(frame: &mut Frame, area: Rect) {
     let body: Vec<String> = vec![
-        "Move      ↑ ↓  (or j/k) ╱ PgUp/PgDn ╱ Home/End jump".to_string(),
-        "Open      → or Enter — expand a folder, or reveal a secret".to_string(),
-        "Views     1 Secrets ╱ 2 Users ╱ 3 Groups ╱ 4 Conflicts (only while conflicted)"
+        "Move      ↑ ↓  (or [j]/[k]) ╱ PgUp/PgDn ╱ Home/End jump".to_string(),
+        "Open      → or Enter expands a folder ╱ ← collapses it".to_string(),
+        "Views     [1] Secrets ╱ [2] Users ╱ [3] Groups ╱ [4] Conflicts (while conflicted)"
             .to_string(),
-        "Secrets   r reveal ╱ y copy ╱ n new ╱ e edit ╱ d delete ╱ f filter ╱ [/] search"
+        "Secrets   [r] reveal ╱ [y] copy ╱ [n] new ╱ [e] edit ╱ [d] delete ╱ [f] filter ╱ [/] search"
             .to_string(),
         "Search    [/] fuzzy-filter keys ╱ ↑↓ pick a hit ╱ Enter act on it ╱ Esc clear".to_string(),
-        "Access    n new ╱ i invite ╱ V delete user ╱ d delete (grants & groups)".to_string(),
-        "Conflicts Enter resolve candidate ╱ r reveal ╱ a accept rollback ╱ s set a fresh value"
+        "Access    [n] invite/new group ╱ [V] delete user ╱ [d] delete grant/group".to_string(),
+        "Conflicts Enter resolve candidate ╱ [r] reveal ╱ [a] accept rollback ╱ [s] set a fresh value"
             .to_string(),
         "Editor    Ctrl-S save ╱ Esc discard (edits stay in memory, never on disk)".to_string(),
-        "Status    H health/diagnostics ╱ L lock now ╱ q quit".to_string(),
+        "Status    [H] health/diagnostics ╱ [L] lock now ╱ [q] quit".to_string(),
         "Safety    masked by default; reveals auto-hide after 30s; relocks after 30m idle"
             .to_string(),
+        "Close     Esc (or press [?] again)".to_string(),
     ];
     render_message_screen(frame, area, "Keys", &body, ACCENT);
 }

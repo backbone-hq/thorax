@@ -6,7 +6,7 @@ use thorax_frontend::{
     merge_driver_status, parse_handle_name, read_invite, remember_user_if_explicit,
     report_root_key_hash, resolve_cli_user_ref_in_report, selector_string, short_hash,
     short_user_hex, stored_default_user, user_config_ref, user_hex, workspace_paths,
-    write_current_user_for_root, FrontendError,
+    write_current_user_for_root, FrontendError, InviteBaselinePolicy,
 };
 use thorax_ops::{
     claim_invite_with_keychain, normalize_handle, write_private_output, Crypto, GrantPermissionV1,
@@ -158,7 +158,10 @@ fn cmd_user_show(cli: &CliContext, args: UserShowArgs) -> Result<ExitCode, Front
         if let Some(handle) = &user.handle {
             println!("resolved handle: {}", handle_ref(handle));
         }
-        println!("administer: {}", authority.administer);
+        println!(
+            "vault administration: {}",
+            if authority.administer { "yes" } else { "no" }
+        );
     }
     Ok(ExitCode::SUCCESS)
 }
@@ -177,10 +180,27 @@ fn cmd_user_invite(cli: &CliContext, args: UserInviteArgs) -> Result<ExitCode, F
         },
     )?;
     let prepared = session.prepare_invite_user(&crypto, Some(handle.clone()), grants)?;
-    let bundle_string = encode_invite(prepared.invite())?;
+    // File invitations carry compact Cord bytes and do not need to fit Bech32m's text limit.
+    // Encode before committing only when the caller explicitly requested a text/QR sink, so an
+    // oversized string can never leave behind a member whose private invitation was not emitted.
+    let text_policy = if args.with_rollback_baseline {
+        InviteBaselinePolicy::Include
+    } else {
+        InviteBaselinePolicy::Omit
+    };
+    let file_policy = if args.compact {
+        InviteBaselinePolicy::Omit
+    } else {
+        InviteBaselinePolicy::Include
+    };
+    let bundle_string = if args.print_unsafe || args.qr {
+        Some(encode_invite(prepared.invite(), text_policy)?)
+    } else {
+        None
+    };
     let bundle_file = match &args.invite_file {
         Some(path) => {
-            let bytes = invite_bytes(prepared.invite())?;
+            let bytes = invite_bytes(prepared.invite(), file_policy)?;
             write_private_output(path, &bytes, args.overwrite)?;
             let verified = thorax_ops::read_file_bounded(path, thorax_ops::MAX_INVITE_BYTES)
                 .map_err(|source| FrontendError::Io {
@@ -220,14 +240,17 @@ fn cmd_user_invite(cli: &CliContext, args: UserInviteArgs) -> Result<ExitCode, F
             "handle": handle_display(&handle),
             "handle_id": invited.handle.as_ref().map(|handle| hash_hex(&handle.0)),
             "grants": invited.grants.iter().map(|grant| hash_hex(&grant.0)).collect::<Vec<_>>(),
-            "invite_file": bundle_file.as_ref().map(|path| path.display().to_string()),
+                "invite_file": bundle_file.as_ref().map(|path| path.display().to_string()),
+                "invite_file_rollback_protected": bundle_file.as_ref().map(|_| matches!(file_policy, InviteBaselinePolicy::Include)),
             "encrypted": encrypted.iter().map(selector_string).collect::<Vec<_>>(),
             "rotation_required": reconciled.needs_rotation.iter().map(selector_string).collect::<Vec<_>>(),
             "admin": user_hex(&admin.resolved.user_id),
             "admin_handle": admin.resolved.handle.as_ref().map(|handle| handle_display(handle)),
         });
         if args.print_unsafe {
-            output["invite"] = json!(bundle_string);
+            output["invite"] = json!(bundle_string.as_deref().expect("encoded above"));
+            output["invite_rollback_protected"] =
+                json!(matches!(text_policy, InviteBaselinePolicy::Include));
         }
         println!("{output}");
         return Ok(ExitCode::SUCCESS);
@@ -251,6 +274,14 @@ fn cmd_user_invite(cli: &CliContext, args: UserInviteArgs) -> Result<ExitCode, F
             handle_ref(&handle)
         );
         println!(
+            "first-sync rollback baseline: {}",
+            if matches!(file_policy, InviteBaselinePolicy::Include) {
+                "included"
+            } else {
+                "omitted (rollback protection begins after claim)"
+            }
+        );
+        println!(
             "{} joins by running:  thorax claim {}",
             handle_ref(&handle),
             path.display()
@@ -259,7 +290,10 @@ fn cmd_user_invite(cli: &CliContext, args: UserInviteArgs) -> Result<ExitCode, F
     if args.print_unsafe {
         println!();
         println!("invite (private key — handle securely, do not paste into chat/logs):");
-        println!("{bundle_string}");
+        println!("{}", bundle_string.as_deref().expect("encoded above"));
+        if matches!(text_policy, InviteBaselinePolicy::Omit) {
+            println!("note: compact invite — rollback protection begins after claim");
+        }
         println!(
             "{} joins by running:  thorax claim --invite <invite>",
             handle_ref(&handle)
@@ -267,7 +301,10 @@ fn cmd_user_invite(cli: &CliContext, args: UserInviteArgs) -> Result<ExitCode, F
     }
     if args.qr {
         println!();
-        match bundle::qr(&bundle_string) {
+        if matches!(text_policy, InviteBaselinePolicy::Omit) {
+            println!("compact invite — rollback protection begins after claim");
+        }
+        match bundle::qr(bundle_string.as_deref().expect("encoded above")) {
             Ok(rendered) => {
                 println!(
                     "scan to claim — this encodes {}'s private key; show it only on a trusted screen:",
@@ -284,8 +321,8 @@ fn cmd_user_invite(cli: &CliContext, args: UserInviteArgs) -> Result<ExitCode, F
     if !encrypted.is_empty() {
         println!();
         println!(
-            "encrypted {} secret(s) so {} can read them",
-            encrypted.len(),
+            "encrypted {} so {} can read them",
+            thorax_frontend::count_noun(encrypted.len(), "secret"),
             handle_ref(&handle)
         );
     }
@@ -327,7 +364,7 @@ pub(crate) fn cmd_claim(cli: &CliContext, args: ClaimArgs) -> Result<ExitCode, F
                 "identity_backend": claimed.stored.backend,
                 "default_user": default_ref,
                 "vault_name": primary_vault_name(&claimed.report),
-                "baseline_checked": true,
+                "baseline_checked": claimed.rollback_protected,
                 "merge_driver": driver_status.name(),
             })
         );
@@ -339,6 +376,9 @@ pub(crate) fn cmd_claim(cli: &CliContext, args: ClaimArgs) -> Result<ExitCode, F
     println!("joined @{db_label} as {}", user_label(&resolved));
     println!("identity stored in: {}", claimed.stored.backend);
     println!("default user set for this vault");
+    if !claimed.rollback_protected {
+        println!("note: compact invite — rollback protection begins from this claimed state");
+    }
     if let Some(hint) = driver_status.hint() {
         println!();
         println!("note: {hint}");

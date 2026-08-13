@@ -267,7 +267,7 @@ pub fn update(model: &mut Model, msg: Message) -> Vec<Effect> {
         }
         Message::Open => {
             if model.view == View::Access {
-                model.toggle_access();
+                model.expand_access();
                 return vec![];
             }
             // In the Merge view, → on a conflict header steps into its first candidate.
@@ -282,7 +282,7 @@ pub fn update(model: &mut Model, msg: Message) -> Vec<Effect> {
             if model.view == View::Secrets && model.selected_leaf().is_some() {
                 return vec![];
             }
-            model.toggle_open();
+            model.expand();
             return vec![];
         }
         Message::Close => {
@@ -1240,9 +1240,10 @@ fn grant_form_key(model: &mut Model, key: crossterm::event::KeyEvent) -> Vec<Eff
     let word = key
         .modifiers
         .intersects(crossterm::event::KeyModifiers::CONTROL | crossterm::event::KeyModifiers::ALT);
+    let field_count = if form.is_admin() { 2 } else { 3 };
     match key.code {
-        KeyCode::Up | KeyCode::BackTab => form.field = (form.field + 2) % 3,
-        KeyCode::Down | KeyCode::Tab => form.field = (form.field + 1) % 3,
+        KeyCode::Up | KeyCode::BackTab => form.field = (form.field + field_count - 1) % field_count,
+        KeyCode::Down | KeyCode::Tab => form.field = (form.field + 1) % field_count,
         KeyCode::Left => match form.field {
             0 => form.subject_idx = (form.subject_idx + n - 1) % n,
             1 => form.class_idx = (form.class_idx + 3) % 4,

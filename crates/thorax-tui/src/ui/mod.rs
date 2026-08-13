@@ -404,64 +404,86 @@ fn render_footer(model: &Model, frame: &mut Frame, area: Rect) {
         );
         return;
     }
-    // Left: key hints for the current screen, ordered most- to least-essential. `fit_hints` keeps
-    // the trailing `? help` and fills the rest from the front for the available width, so a narrow
-    // terminal drops low-priority hints whole instead of clipping the line mid-word.
+    // Left: key hints for the current screen, ordered most- to least-essential. Single-character
+    // shortcuts are bracketed everywhere, matching the numbered view tabs. `fit_hints` keeps the
+    // final essential hint and fills the rest from the front, so a narrow terminal drops
+    // low-priority hints whole instead of clipping the line mid-word.
     let hints: Vec<&str> = if model.block.is_some() {
-        vec!["q quit"]
+        vec!["[q] quit"]
     } else {
         match model.view {
-            View::Secrets if model.searching => vec![
-                "type to filter",
-                "↑↓ pick",
-                "Enter to act",
-                "Esc clear",
-                "? help",
-                "q quit",
-            ],
-            View::Secrets => vec![
-                "↑↓ move",
-                "→ open/reveal",
-                "[/] search",
-                "n new",
-                "e edit",
-                "d delete",
-                "f filter",
-                "H health",
-                "? help",
-                "q quit",
-            ],
-            View::Access => vec![
-                "↑↓ move",
-                "→ expand",
-                "n new",
-                "i invite",
-                "V delete user",
-                "d delete",
-                "H health",
-                "? help",
-                "q quit",
-            ],
+            View::Secrets if model.searching => {
+                vec!["type to filter", "↑↓ pick", "Enter to act", "Esc clear"]
+            }
+            View::Secrets => {
+                let actions = model.view_buttons();
+                let mut hints = vec!["↑↓ move"];
+                if model.selected_branch_path().is_some() {
+                    hints.push("←→ collapse/expand");
+                }
+                if actions.contains(&ButtonAction::RevealSecret) {
+                    hints.push("[r] reveal");
+                    hints.push("[y] copy");
+                } else if actions.contains(&ButtonAction::HideSecret) {
+                    hints.push("[r] hide");
+                    hints.push("[y] copy");
+                }
+                hints.push("[/] search");
+                hints.push("[n] new");
+                if actions.contains(&ButtonAction::EditSecret) {
+                    hints.push("[e] edit");
+                }
+                if actions.contains(&ButtonAction::DeleteSecret) {
+                    hints.push("[d] delete");
+                }
+                hints.push("[f] filter");
+                hints.push("[H] health");
+                hints.push("[q] quit");
+                hints.push("[?] help");
+                hints
+            }
+            View::Access => {
+                let actions = model.view_buttons();
+                let mut hints = vec!["↑↓ move"];
+                if actions.contains(&ButtonAction::NewGrant) {
+                    hints.push("←→ collapse/expand");
+                }
+                match model.access_tab {
+                    AccessTab::Users => hints.push("[n] invite"),
+                    AccessTab::Groups => hints.push("[n] new group"),
+                }
+                if actions.contains(&ButtonAction::DeleteUser) {
+                    hints.push("[V] delete user");
+                }
+                if actions.contains(&ButtonAction::DeleteGrant) {
+                    hints.push("[d] delete grant");
+                } else if actions.contains(&ButtonAction::DeleteAccess) {
+                    hints.push("[d] delete group");
+                }
+                hints.push("[H] health");
+                hints.push("[q] quit");
+                hints.push("[?] help");
+                hints
+            }
             // A rollback's header row offers the in-place outs (accept; a fresh set on
             // secret keys); every other selection keeps the ratify keys.
             View::Merge => match model.selected_conflict_view() {
                 Some(view) if view.acceptable => {
                     let mut v = vec!["↑↓ move"];
                     if view.settable {
-                        v.push("s set a fresh value");
+                        v.push("[s] set a fresh value");
                     }
-                    v.push("a accept the rollback");
-                    v.push("? help");
-                    v.push("q quit");
+                    v.push("[a] accept the rollback");
+                    v.push("[q] quit");
+                    v.push("[?] help");
                     v
                 }
                 _ => vec![
                     "↑↓ move",
-                    "r reveal",
+                    "[r] reveal",
                     "Enter resolve candidate",
-                    "then: git add the vault",
-                    "? help",
-                    "q quit",
+                    "[q] quit",
+                    "[?] help",
                 ],
             },
         }
@@ -469,7 +491,7 @@ fn render_footer(model: &Model, frame: &mut Frame, area: Rect) {
     frame.render_widget(Paragraph::new(fit_hints(&hints, area.width)), area);
 }
 
-/// Join `segments` with ` ╱ ` for the given width, always keeping the last segment (`? help`) and
+/// Join `segments` with ` ╱ ` for the given width, always keeping the last (essential) segment and
 /// greedily filling from the front. Hints that don't fit are dropped whole, never clipped mid-word.
 fn fit_hints(segments: &[&str], width: u16) -> Line<'static> {
     let Some((help, body)) = segments.split_last() else {
@@ -492,7 +514,9 @@ fn fit_hints(segments: &[&str], width: u16) -> Line<'static> {
 }
 
 fn truncate(s: &str, max: usize) -> String {
-    if s.chars().count() <= max {
+    if max == 0 {
+        String::new()
+    } else if s.chars().count() <= max {
         s.to_string()
     } else {
         format!("{}…", s.chars().take(max - 1).collect::<String>())
@@ -597,7 +621,7 @@ mod layout_tests {
 
     #[test]
     fn fit_hints_keeps_everything_when_wide() {
-        let segs = ["↑↓ move", "→ open/reveal", "n new", "? help"];
+        let segs = ["↑↓ move", "→ expand", "[n] new", "[?] help"];
         let got = text(&fit_hints(&segs, 100));
         for s in segs {
             assert!(got.contains(s), "wide line should keep {s:?}: {got:?}");
@@ -606,12 +630,12 @@ mod layout_tests {
 
     #[test]
     fn fit_hints_drops_low_priority_but_always_keeps_help() {
-        // Width fits "↑↓ move ╱ ? help" but not the middle hints — they drop whole, help survives.
-        let segs = ["↑↓ move", "→ open/reveal", "n new", "e edit", "? help"];
-        let got = text(&fit_hints(&segs, 16));
-        assert!(got.contains("? help"), "help must always remain: {got:?}");
+        // Width fits "↑↓ move ╱ [?] help" but not the middle hints — they drop whole, help survives.
+        let segs = ["↑↓ move", "→ expand", "[n] new", "[e] edit", "[?] help"];
+        let got = text(&fit_hints(&segs, 18));
+        assert!(got.contains("[?] help"), "help must always remain: {got:?}");
         assert!(
-            !got.contains("e edit"),
+            !got.contains("[e] edit"),
             "low-priority hint should drop: {got:?}"
         );
         // Never clipped mid-word: every rendered segment is whole.
@@ -625,7 +649,7 @@ mod layout_tests {
 
     #[test]
     fn fit_hints_keeps_help_even_when_nothing_else_fits() {
-        let segs = ["↑↓ move", "→ open/reveal", "? help"];
-        assert_eq!(text(&fit_hints(&segs, 4)), "? help");
+        let segs = ["↑↓ move", "→ expand", "[?] help"];
+        assert_eq!(text(&fit_hints(&segs, 4)), "[?] help");
     }
 }

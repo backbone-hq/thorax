@@ -155,8 +155,9 @@ fn cmd_grant_permission(
         println!("permission: {}", grant_permission_string(&permission));
         if matching_count > 0 {
             println!(
-                "matches: {} secret(s) under {}",
-                matching_count, selector_display
+                "matches: {} under {}",
+                thorax_frontend::count_noun(matching_count, "secret"),
+                selector_display
             );
         }
         println!("signed by: {}", user_label(&issuer.resolved));
@@ -315,10 +316,10 @@ fn cmd_group_list(cli: &CliContext) -> Result<ExitCode, FrontendError> {
     for (group, record) in groups {
         let members = group_members(session.report(), group);
         println!(
-            "{}\t{}\t{} member(s)",
+            "{}\t{}\t{}",
             short_hash(&group.0),
             format_args!("%{}", record.handle),
-            members.len()
+            thorax_frontend::count_noun(members.len(), "member")
         );
     }
     Ok(ExitCode::SUCCESS)
@@ -526,14 +527,14 @@ fn grant_permission_string(permission: &GrantPermissionV1) -> String {
                 .iter()
                 .map(grant_class_name)
                 .collect::<Vec<_>>()
-                .join(",");
+                .join(", ");
             format!(
-                "manage {} [{}]",
+                "manage {} (can grant: {})",
                 keyspace_selector_string(&manage.selector),
                 grantable
             )
         }
-        GrantPermissionV1::Administer => "administer".to_string(),
+        GrantPermissionV1::Administer => "administer entire vault".to_string(),
     }
 }
 

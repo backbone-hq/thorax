@@ -9,14 +9,16 @@ use pyo3::create_exception;
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict, PyString, PyTuple, PyType};
-use thorax_frontend::{parse_secret_selector, resolve_cli_user_ref_with_report, selector_string};
+use thorax_frontend::{
+    decode_invite_bytes, parse_secret_selector, resolve_cli_user_ref_with_report, selector_string,
+};
 use thorax_ops::{
-    ensure_ratchet_from_invite, KeyUsePurpose, KeyspaceLabelMatcherV1, KeyspaceSelectorV1,
-    LabelMatcherV1, LockedSession, OpsError, PassphraseKeychain, SecretLabelV1, SecretSelectorV1,
-    StaticPassphraseProvider, TupleMatcherV1, UnlockedSession, WorkspacePaths, INVITE_MAGIC,
+    ensure_ratchet_from_invite, InvitationMaterial, KeyUsePurpose, KeyspaceLabelMatcherV1,
+    KeyspaceSelectorV1, LabelMatcherV1, LockedSession, OpsError, PassphraseKeychain, SecretLabelV1,
+    SecretSelectorV1, StaticPassphraseProvider, TupleMatcherV1, UnlockedSession, WorkspacePaths,
     MAX_INVITE_BYTES,
 };
-use thorax_ops::{AutoKeychain, Crypto, Identity, Invite, NoManualIdentityProvider};
+use thorax_ops::{AutoKeychain, Crypto, Identity, NoManualIdentityProvider};
 
 create_exception!(thorax, ThoraxError, PyException);
 create_exception!(thorax, NotFound, ThoraxError);
@@ -442,7 +444,8 @@ fn ensure_no_sdk_conflicts(effective: &thorax_ops::EffectiveState) -> PyResult<(
         Ok(())
     } else {
         Err(ConflictError::new_err(format!(
-            "vault has {count} unresolved conflict(s); resolve conflicts before using the Thorax Python SDK"
+            "vault has {}; resolve them before using the Thorax Python SDK",
+            thorax_frontend::count_noun(count, "unresolved conflict")
         )))
     }
 }
@@ -531,19 +534,12 @@ fn material_from_py(value: &Bound<'_, PyAny>) -> PyResult<BundleMaterial> {
     material_from_py(&read)
 }
 
-fn parse_invite(material: BundleMaterial) -> PyResult<thorax_ops::InviteV1> {
+fn parse_invite(material: BundleMaterial) -> PyResult<InvitationMaterial> {
     match material {
         BundleMaterial::Text(text) => {
             thorax_frontend::read_invite(Some(text), None).map_err(py_err)
         }
-        BundleMaterial::Bytes(bytes) => {
-            let payload = bytes
-                .strip_prefix(INVITE_MAGIC)
-                .ok_or_else(|| IdentityError::new_err("invite file is missing its magic prefix"))?;
-            match cord::deserialize::<Invite>(payload).map_err(py_err)? {
-                Invite::V1(invite) => Ok(invite),
-            }
-        }
+        BundleMaterial::Bytes(bytes) => decode_invite_bytes(&bytes).map_err(py_err),
     }
 }
 

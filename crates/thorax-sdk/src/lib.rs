@@ -23,7 +23,7 @@ use thorax_frontend::{
     resolve_cli_user_ref_with_report, selector_string, FrontendError,
 };
 use thorax_ops::{
-    ensure_ratchet_from_invite, AutoKeychain, Crypto, Identity, InviteV1, KeyUsePurpose,
+    ensure_ratchet_from_invite, AutoKeychain, Crypto, Identity, InvitationMaterial, KeyUsePurpose,
     KeychainError, LockedSession, NoManualIdentityProvider, OpsError, PassphraseKeychain,
     StaticPassphraseProvider, UnlockedSession, WorkspacePaths,
 };
@@ -43,7 +43,7 @@ pub enum Error {
     #[error("environment authentication requires a Thorax invite")]
     MissingEnvironmentInvite,
     #[error(
-        "vault has {0} unresolved conflict(s); resolve conflicts before using the Thorax Rust SDK"
+        "vault contains unresolved conflicts (count: {0}); resolve them before using the Thorax Rust SDK"
     )]
     ConflictedVault(usize),
     #[error("secret {selector} is not valid UTF-8")]
@@ -81,7 +81,7 @@ pub struct Auth {
 
 enum AuthInner {
     Keychain(KeychainConfig),
-    Invite(InviteV1),
+    Invite(InvitationMaterial),
     Environment,
 }
 
@@ -329,7 +329,7 @@ fn open_with_keychain(paths: &WorkspacePaths, config: KeychainConfig) -> Result<
     }
 }
 
-fn open_with_invite(paths: &WorkspacePaths, invite: InviteV1) -> Result<UnlockedSession> {
+fn open_with_invite(paths: &WorkspacePaths, invite: InvitationMaterial) -> Result<UnlockedSession> {
     ensure_ratchet_from_invite(paths, &Crypto, &invite)?;
     let identity =
         Identity::from_master_seed(&Crypto, &invite.master_seed).map_err(OpsError::from)?;

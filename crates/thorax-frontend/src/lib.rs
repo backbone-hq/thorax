@@ -23,13 +23,13 @@ pub use merge_driver::{
 pub use merge_view::{
     candidate_summary, conflict_kind_name, conflict_kind_summary, conflict_label, record_key_kind,
 };
-pub use render::{hash_hex, hex_bytes, short_hash, short_user_hex, user_hex};
+pub use render::{count_noun, hash_hex, hex_bytes, short_hash, short_user_hex, user_hex};
 pub use runtime::{
     build_keychain, build_keychain_with_passphrase, ci_identity_user, ci_invite,
-    confirm_destructive, copy_to_clipboard, encode_invite, explicit_or_current_root, invite_bytes,
-    maybe_bootstrap_ci_trust, open_session, open_valid_session, read_invite,
-    recover_workspace_if_present, workspace_paths, INVITE_ENV, INVITE_FILE_ENV,
-    UNSAFE_KEYCHAIN_PASSPHRASE_ENV,
+    confirm_destructive, copy_to_clipboard, decode_invite_bytes, encode_invite,
+    explicit_or_current_root, invite_bytes, maybe_bootstrap_ci_trust, open_session,
+    open_valid_session, read_invite, recover_workspace_if_present, workspace_paths,
+    InviteBaselinePolicy, INVITE_ENV, INVITE_FILE_ENV, UNSAFE_KEYCHAIN_PASSPHRASE_ENV,
 };
 pub use selector::{
     escape_segment, escape_tuple, parse_secret_query, parse_secret_selector, selector_string,

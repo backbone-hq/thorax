@@ -22,6 +22,8 @@ node_modules/
 # Local secrets and credentials
 *.key
 *.pem
+*.thrx
+*.thrx[a-z]
 .thorax/vault.cord.lock
 .env
 .env.*

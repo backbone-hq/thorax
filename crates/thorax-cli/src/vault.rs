@@ -131,7 +131,7 @@ pub(crate) fn cmd_init(cli: &CliContext, args: InitArgs) -> Result<ExitCode, Fro
         println!("next steps:");
         println!("  set a secret:      printf '%s' \"$SECRET\" | thorax set app/prod/db");
         println!(
-            "  invite a teammate: thorax user invite <handle> --read app --invite-file invite.thrx"
+            "  invite a teammate: thorax user invite <handle> --read app --invite-file invite.thrxi"
         );
     }
 

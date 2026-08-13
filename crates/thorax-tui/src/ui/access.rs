@@ -9,7 +9,7 @@ use ratatui::{
 use crate::app::{AccessTab, ListKind, ListRegion, Model};
 use crate::theme;
 
-use super::{panel, slashed, ACCENT, DIM, OK};
+use super::{panel, slashed, truncate, ACCENT, DIM, OK};
 
 // ── access view ──────────────────────────────────────────────────────────────
 
@@ -22,7 +22,7 @@ pub(super) fn render_access(model: &mut Model, frame: &mut Frame, area: Rect) {
     };
     let rows = model.access_rows();
     let block = panel(title).title_bottom(Line::from(slashed(
-        " ↵/→ expand ╱ grants shown below each ",
+        " Enter/→ expand ╱ ← collapse ╱ details appear below each principal ",
         Style::default(),
     )));
     let inner = block.inner(area);
@@ -35,9 +35,9 @@ pub(super) fn render_access(model: &mut Model, frame: &mut Frame, area: Rect) {
                 Line::raw(""),
                 Line::from(Span::styled("No users yet.", bold)),
                 Line::raw(""),
-                Line::from(Span::styled("Press  i  to invite someone.", act)),
+                Line::from(Span::styled("Press [n] to invite someone.", act)),
                 Line::from(Span::styled(
-                    "Press  c  to claim an invite and join an existing workspace.",
+                    "Invited users appear here after creation.",
                     hint,
                 )),
             ],
@@ -45,7 +45,7 @@ pub(super) fn render_access(model: &mut Model, frame: &mut Frame, area: Rect) {
                 Line::raw(""),
                 Line::from(Span::styled("No groups yet.", bold)),
                 Line::raw(""),
-                Line::from(Span::styled("Press  n  to create your first group.", act)),
+                Line::from(Span::styled("Press [n] to create your first group.", act)),
                 Line::from(Span::styled(
                     "Groups bundle grants so you can hand out access in one step.",
                     hint,
@@ -61,7 +61,10 @@ pub(super) fn render_access(model: &mut Model, frame: &mut Frame, area: Rect) {
         );
         return;
     }
-    let items: Vec<ListItem> = rows.iter().map(|r| access_line(model, r)).collect();
+    let items: Vec<ListItem> = rows
+        .iter()
+        .map(|r| access_line(model, r, inner.width))
+        .collect();
     let list = List::new(items)
         .block(block)
         // Selected row: a subtle dark bar + bold, not a bright reverse. Only `bg`/bold are set so
@@ -82,7 +85,11 @@ pub(super) fn render_access(model: &mut Model, frame: &mut Frame, area: Rect) {
     });
 }
 
-fn access_line(model: &Model, row: &crate::app::AccessRow) -> ListItem<'static> {
+fn counted(count: usize, singular: &str) -> String {
+    thorax_frontend::count_noun(count, singular)
+}
+
+fn access_line(model: &Model, row: &crate::app::AccessRow, width: u16) -> ListItem<'static> {
     use crate::app::AccessRow;
     match row {
         AccessRow::User { idx, expanded } => {
@@ -91,15 +98,26 @@ fn access_line(model: &Model, row: &crate::app::AccessRow) -> ListItem<'static> 
             };
             let marker = if *expanded { "▾ " } else { "▸ " };
             let mut tags = Vec::new();
+            let direct_grants = u
+                .grants
+                .iter()
+                .filter(|grant| grant.grant_id.is_some())
+                .count();
             if u.is_root {
                 tags.push("root".to_string());
+                tags.push("full access".to_string());
             }
-            tags.push(format!("{} grant(s)", u.grants.len()));
+            if direct_grants > 0 || !u.is_root {
+                tags.push(counted(direct_grants, "grant"));
+            }
+            if !u.group_memberships.is_empty() {
+                tags.push(counted(u.group_memberships.len(), "group"));
+            }
             let color = theme::TEXT;
             let mut line = vec![
                 Span::raw(marker),
                 Span::styled(
-                    format!("{:<20}", u.label()),
+                    format!("{:<20}", truncate(&u.label(), 19)),
                     Style::new().fg(color).add_modifier(Modifier::BOLD),
                 ),
             ];
@@ -114,15 +132,15 @@ fn access_line(model: &Model, row: &crate::app::AccessRow) -> ListItem<'static> 
             let mut line = vec![
                 Span::raw(marker),
                 Span::styled(
-                    format!("%{:<19}", g.handle),
+                    format!("{:<20}", truncate(&format!("%{}", g.handle), 19)),
                     Style::new().fg(theme::TEXT).add_modifier(Modifier::BOLD),
                 ),
             ];
             line.extend(slashed(
                 &format!(
-                    "{} grant(s) ╱ {} member(s)",
-                    g.grants.len(),
-                    g.members.len()
+                    "{} ╱ {}",
+                    counted(g.grants.len(), "grant"),
+                    counted(g.members.len(), "member")
                 ),
                 Style::new().fg(DIM),
             ));
@@ -132,10 +150,13 @@ fn access_line(model: &Model, row: &crate::app::AccessRow) -> ListItem<'static> 
             class, keyspace, ..
         } => {
             // Two columns: access class, then keyspace (like the keyspace display).
+            // `administer` is ten characters, so the class column needs an explicit two-cell
+            // gutter beyond that longest label; otherwise it runs into `entire vault`.
+            let keyspace_width = (width as usize).saturating_sub(16).max(1);
             ListItem::new(Line::from(vec![
                 Span::raw("    "),
-                Span::styled(format!("{class:<10}"), Style::new().fg(OK)),
-                Span::raw(keyspace.clone()),
+                Span::styled(format!("{class:<12}"), Style::new().fg(OK)),
+                Span::raw(truncate(keyspace, keyspace_width)),
             ]))
         }
         AccessRow::Member { label } => ListItem::new(Line::from(vec![

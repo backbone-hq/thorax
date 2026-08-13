@@ -15,6 +15,8 @@ const INVITE_HRP: &str = "thrx";
 
 #[derive(Debug)]
 pub enum BundleStringError {
+    /// The artifact exceeds Bech32m's maximum code length.
+    TooLargeForText,
     /// Not valid bech32, or the checksum did not verify (likely a truncated/mistyped paste).
     Malformed,
     /// Valid bech32, but not the expected Thorax artifact (wrong human-readable prefix).
@@ -23,10 +25,9 @@ pub enum BundleStringError {
     TooLargeForQr,
 }
 
-fn encode_with(hrp: &str, bytes: &[u8]) -> String {
+fn encode_with(hrp: &str, bytes: &[u8]) -> Result<String, BundleStringError> {
     let hrp = Hrp::parse_unchecked(hrp);
-    // Encoding only fails for lengths far beyond any real artifact; treat as unreachable.
-    bech32::encode::<Bech32m>(hrp, bytes).expect("bech32m encoding of a Thorax artifact")
+    bech32::encode::<Bech32m>(hrp, bytes).map_err(|_| BundleStringError::TooLargeForText)
 }
 
 fn decode_with(expected_hrp: &str, text: &str) -> Result<Vec<u8>, BundleStringError> {
@@ -38,7 +39,7 @@ fn decode_with(expected_hrp: &str, text: &str) -> Result<Vec<u8>, BundleStringEr
 }
 
 /// Encode raw invite bytes as a `thrx1…` bech32m string.
-pub fn encode(bytes: &[u8]) -> String {
+pub fn encode(bytes: &[u8]) -> Result<String, BundleStringError> {
     encode_with(INVITE_HRP, bytes)
 }
 
@@ -60,14 +61,22 @@ mod tests {
     #[test]
     fn round_trips_and_is_prefixed() {
         let bytes = [1_u8, 2, 3, 4, 250, 0, 9];
-        let text = encode(&bytes);
+        let text = encode(&bytes).unwrap();
         assert!(text.starts_with("thrx1"), "got {text}");
         assert_eq!(decode(&text).unwrap(), bytes);
     }
 
     #[test]
+    fn oversized_artifact_returns_an_error_instead_of_panicking() {
+        assert!(matches!(
+            encode(&[0_u8; 1024]),
+            Err(BundleStringError::TooLargeForText)
+        ));
+    }
+
+    #[test]
     fn a_corrupted_paste_is_rejected() {
-        let mut text = encode(&[7_u8; 48]);
+        let mut text = encode(&[7_u8; 48]).unwrap();
         let idx = text.len() - 3;
         let bad = if text.as_bytes()[idx] == b'q' {
             'p'

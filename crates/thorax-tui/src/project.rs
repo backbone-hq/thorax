@@ -362,16 +362,13 @@ pub fn permission_columns(permission: &GrantPermissionV1) -> (String, String) {
                 .iter()
                 .map(grant_class_name)
                 .collect::<Vec<_>>()
-                .join(",");
+                .join(", ");
             (
                 "manage".to_string(),
-                format!("{} [can grant: {}]", keyspace_display(&m.selector), classes),
+                format!("{} (can grant: {})", keyspace_display(&m.selector), classes),
             )
         }
-        GrantPermissionV1::Administer => (
-            "administer".to_string(),
-            "(the principal graph)".to_string(),
-        ),
+        GrantPermissionV1::Administer => ("administer".to_string(), "entire vault".to_string()),
     }
 }
 
@@ -426,8 +423,8 @@ pub fn build_access(state: &EffectiveState) -> AccessModel {
         if is_root {
             grants.push(AccessGrant {
                 grant_id: None,
-                class: "all".to_string(),
-                keyspace: "initial authority — full access (cannot be deleted)".to_string(),
+                class: "administer".to_string(),
+                keyspace: "entire vault (initial authority; cannot be deleted)".to_string(),
             });
         }
         let u = user.clone();
@@ -583,9 +580,9 @@ pub fn grant_class_name(class: &KeyspaceGrantClassV1) -> &'static str {
 
 pub fn keyspace_display(selector: &KeyspaceSelectorV1) -> String {
     let tuple = match &selector.tuple {
-        TupleMatcherV1::Any => "* (all secrets)".to_string(),
-        TupleMatcherV1::Exact(t) => format!("{} (this secret only)", escape_tuple(t)),
-        TupleMatcherV1::Prefix(t) => format!("{}/* (and everything under)", escape_tuple(t)),
+        TupleMatcherV1::Any => "* (entire vault)".to_string(),
+        TupleMatcherV1::Exact(t) => format!("{} (exact)", escape_tuple(t)),
+        TupleMatcherV1::Prefix(t) => format!("{}/*", escape_tuple(t)),
     };
     if selector.labels.is_empty() {
         return tuple;
@@ -595,7 +592,7 @@ pub fn keyspace_display(selector: &KeyspaceSelectorV1) -> String {
         .iter()
         .map(|m| format!("{}{}", m.key, label_matcher_display(&m.matcher)))
         .collect::<Vec<_>>()
-        .join(",");
+        .join(", ");
     format!("{tuple} {{{labels}}}")
 }
 
@@ -820,10 +817,10 @@ pub fn build_merge(
                 // A rollback whose records were dropped entirely: nothing here to ratify —
                 // the in-place ways out are a fresh write (secret keys) and accepting it.
                 Some(if settable {
-                    "no surviving candidates ╱ s set a fresh value ╱ a accept the rollback"
+                    "no surviving candidates ╱ [s] set a fresh value ╱ [a] accept the rollback"
                         .to_string()
                 } else {
-                    "no surviving candidates ╱ a accept the rollback".to_string()
+                    "no surviving candidates ╱ [a] accept the rollback".to_string()
                 })
             } else {
                 match acting {

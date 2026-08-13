@@ -10,13 +10,14 @@ use std::sync::{Arc, Mutex};
 use napi::bindgen_prelude::{AsyncTask, Buffer, Either, Either3, Uint8Array};
 use napi::{Env, Error, JsObject, Result, Status, Task};
 use napi_derive::napi;
-use thorax_frontend::{parse_secret_selector, resolve_cli_user_ref_with_report, selector_string};
+use thorax_frontend::{
+    decode_invite_bytes, parse_secret_selector, resolve_cli_user_ref_with_report, selector_string,
+};
 use thorax_ops::{
-    ensure_ratchet_from_invite, AutoKeychain, Crypto, Identity, Invite, KeyUsePurpose,
+    ensure_ratchet_from_invite, AutoKeychain, Crypto, Identity, InvitationMaterial, KeyUsePurpose,
     KeyspaceLabelMatcherV1, KeyspaceSelectorV1, LabelMatcherV1, LockedSession,
     NoManualIdentityProvider, OpsError, PassphraseKeychain, SecretLabelV1, SecretSelectorV1,
-    StaticPassphraseProvider, TupleMatcherV1, UnlockedSession, WorkspacePaths, INVITE_MAGIC,
-    MAX_INVITE_BYTES,
+    StaticPassphraseProvider, TupleMatcherV1, UnlockedSession, WorkspacePaths, MAX_INVITE_BYTES,
 };
 
 type SessionCell = Arc<Mutex<Option<UnlockedSession>>>;
@@ -622,7 +623,8 @@ fn ensure_no_sdk_conflicts(effective: &thorax_ops::EffectiveState) -> Result<()>
         Err(js_error(
             "conflict",
             format!(
-                "vault has {count} unresolved conflict(s); resolve conflicts before using the Thorax Node SDK"
+                "vault has {}; resolve them before using the Thorax Node SDK",
+                thorax_frontend::count_noun(count, "unresolved conflict")
             ),
         ))
     }
@@ -707,19 +709,12 @@ fn read_bundle_file(path: &Path) -> Result<BundleMaterial> {
     Ok(BundleMaterial::Bytes(bytes))
 }
 
-fn parse_invite(material: BundleMaterial) -> Result<thorax_ops::InviteV1> {
+fn parse_invite(material: BundleMaterial) -> Result<InvitationMaterial> {
     match material {
         BundleMaterial::Text(text) => {
             thorax_frontend::read_invite(Some(text), None).map_err(js_from_display)
         }
-        BundleMaterial::Bytes(bytes) => {
-            let payload = bytes
-                .strip_prefix(INVITE_MAGIC)
-                .ok_or_else(|| js_error("identity", "invite file is missing its magic prefix"))?;
-            match cord::deserialize::<Invite>(payload).map_err(js_from_display)? {
-                Invite::V1(invite) => Ok(invite),
-            }
-        }
+        BundleMaterial::Bytes(bytes) => decode_invite_bytes(&bytes).map_err(js_from_display),
     }
 }
 
