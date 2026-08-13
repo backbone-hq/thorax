@@ -13,3 +13,6 @@ napi = "2"
 napi-derive = "2"
 thorax-frontend.workspace = true
 thorax-ops.workspace = true
+
+[build-dependencies]
+napi-build = "=2.2.4"

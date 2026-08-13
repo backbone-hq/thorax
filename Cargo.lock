@@ -1956,6 +1956,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "napi-build"
+version = "2.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ae82775d1b06f3f07efd0666e59bbc175da8383bc372051031d7a447e94fbea"
+
+[[package]]
 name = "napi-derive"
 version = "2.16.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3571,6 +3577,7 @@ version = "1.0.0"
 dependencies = [
  "cord",
  "napi",
+ "napi-build",
  "napi-derive",
  "thorax-frontend",
  "thorax-ops",
