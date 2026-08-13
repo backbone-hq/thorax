@@ -175,8 +175,11 @@ jobs:
             [[ "$digest" =~ ^[0-9a-f]{64}$ ]]
             sources+=("$REGISTRY_IMAGE@sha256:$digest")
           done
-          docker buildx imagetools create --tag "$STAGING_IMAGE" "${sources[@]}"
-          image_digest="$(docker buildx imagetools inspect "$STAGING_IMAGE" | awk '$1 == "Digest:" { print $2; exit }')"
+          metadata_file=/tmp/controller-image-metadata.json
+          docker buildx imagetools create --tag "$STAGING_IMAGE" \
+            --metadata-file "$metadata_file" \
+            "${sources[@]}"
+          image_digest="$(jq -er '."containerimage.descriptor".digest' "$metadata_file")"
           [[ "$image_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
           printf 'digest=%s\n' "$image_digest" >> "$GITHUB_OUTPUT"
 
