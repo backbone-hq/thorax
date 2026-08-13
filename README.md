@@ -7,7 +7,7 @@
 
 Thorax is secrets management for humans, agents, and apps.
 
-One encrypted, signed vault carries the same identities, grants, selectors, history, and rollback protections from a developer's terminal into scripts, app runtimes, CI, Git workflows, and Kubernetes. There is no central secrets service to operate and no second source of truth to keep in sync.
+Store your secrets in one encrypted vault and use them everywhere: from local development and CI to application code and Kubernetes. The vault can live in Git, with access rules and signed history built in, so there's no secrets server to run or separate copies to keep in sync.
 
 - **Use Thorax everywhere you work**: script with the CLI, manage the vault in a keyboard-driven TUI, use native SDKs in Rust, Python, and Node apps, or bring secrets to an app written in any other language with `thorax run`.
 - **Store and collaborate in Git**: commit the encrypted vault beside your code, branch it, review it, and merge it. Thorax combines compatible signed histories automatically, detects rollbacks and contested edits, and gives authorized users explicit conflict resolution in the CLI or TUI.
