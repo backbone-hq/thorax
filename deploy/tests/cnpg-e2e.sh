@@ -353,8 +353,14 @@ kubectl -n "$THORAX_E2E_NAMESPACE" rollout status deployment/env-reader --timeou
 
 primary=$(kubectl -n "$THORAX_E2E_NAMESPACE" get pod \
   -l cnpg.io/cluster=pg,role=primary -o jsonpath='{.items[0].metadata.name}')
-initial_user=$(kubectl -n "$THORAX_E2E_NAMESPACE" exec "$primary" -- \
-  env PGPASSWORD=cnpg-password-v1 psql -h pg-rw -U thorax_app -d postgres -tAc 'SELECT current_user')
+initial_user=""
+for _ in $(seq 1 120); do
+  initial_user=$(kubectl -n "$THORAX_E2E_NAMESPACE" exec "$primary" -- \
+    env PGPASSWORD=cnpg-password-v1 psql -h pg-rw -U thorax_app -d postgres \
+    -tAc 'SELECT current_user' 2>/dev/null || true)
+  [[ "$initial_user" == thorax_app ]] && break
+  sleep 2
+done
 [[ "$initial_user" == thorax_app ]]
 [[ "$(kubectl -n "$THORAX_E2E_NAMESPACE" exec file-reader -- cat /secret/password)" == cnpg-password-v1 ]]
 
