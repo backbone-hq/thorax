@@ -26,6 +26,15 @@ jobs:
       - name: Check release version consistency
         run: scripts/bump-version.sh --check
 
+      - name: Install Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Check locked Node build dependencies
+        working-directory: crates/thorax-node
+        run: npm ci --ignore-scripts
+
       - name: Clippy
         run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
 

@@ -166,6 +166,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Build thorax
+        shell: bash
         run: cargo build --locked --release -p thorax --target "$TARGET"
         env:
           TARGET: ${{ matrix.target }}
