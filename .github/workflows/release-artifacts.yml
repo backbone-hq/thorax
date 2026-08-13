@@ -61,12 +61,25 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   build-kubernetes-controller:
-    name: Build Kubernetes controller image and chart
+    name: Build Kubernetes controller image ${{ matrix.platform }}
     needs: quality-gate
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux/amd64
+            label: amd64
+          - os: ubuntu-24.04-arm
+            platform: linux/arm64
+            label: arm64
+
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
       packages: write
+    env:
+      REGISTRY_IMAGE: ghcr.io/backbone-hq/thorax-kubernetes-controller
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -80,18 +93,92 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish run-scoped controller image
+      # Compile each image on its native architecture. Building arm64 under
+      # QEMU made this Rust build take an hour on the amd64 runner.
+      - name: Build and publish controller image by digest
         id: controller-image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        env:
+          DOCKER_BUILD_RECORD_UPLOAD: false
         with:
           context: .
           file: deploy/thorax-kubernetes-controller.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ghcr.io/backbone-hq/thorax-kubernetes-controller:build-${{ github.run_id }}
+          platforms: ${{ matrix.platform }}
+          # Keep architectures in separate cache scopes. This makes a retry of
+          # the same release reuse the completed Docker/Rust build instead of
+          # recompiling it, without allowing amd64 and arm64 layers to collide.
+          cache-from: type=gha,scope=controller-${{ matrix.label }}
+          cache-to: type=gha,scope=controller-${{ matrix.label }},mode=max,ignore-error=true
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
           build-args: |
             VERSION=${{ inputs.version }}
             REVISION=${{ github.sha }}
+
+      - name: Stage controller image digest
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.controller-image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          mkdir -p /tmp/controller-digests
+          touch "/tmp/controller-digests/${IMAGE_DIGEST#sha256:}"
+
+      - name: Upload controller image digest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: thorax-kubernetes-controller-digest-${{ matrix.label }}
+          path: /tmp/controller-digests/*
+          if-no-files-found: error
+
+  package-kubernetes-controller:
+    name: Assemble Kubernetes controller image and chart
+    needs:
+      - quality-gate
+      - build-kubernetes-controller
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY_IMAGE: ghcr.io/backbone-hq/thorax-kubernetes-controller
+      STAGING_IMAGE: ghcr.io/backbone-hq/thorax-kubernetes-controller:build-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download controller image digests
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: thorax-kubernetes-controller-digest-*
+          path: /tmp/controller-digests
+          merge-multiple: true
+
+      - name: Assemble run-scoped controller image
+        id: controller-image
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t digests < <(find /tmp/controller-digests -maxdepth 1 -type f -printf '%f\n' | sort)
+          (( ${#digests[@]} == 2 ))
+          sources=()
+          for digest in "${digests[@]}"; do
+            [[ "$digest" =~ ^[0-9a-f]{64}$ ]]
+            sources+=("$REGISTRY_IMAGE@sha256:$digest")
+          done
+          docker buildx imagetools create --tag "$STAGING_IMAGE" "${sources[@]}"
+          image_digest="$(docker buildx imagetools inspect "$STAGING_IMAGE" | awk '$1 == "Digest:" { print $2; exit }')"
+          [[ "$image_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf 'digest=%s\n' "$image_digest" >> "$GITHUB_OUTPUT"
 
       - name: Package Helm chart
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4

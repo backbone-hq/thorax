@@ -6,6 +6,7 @@ build-backend = "maturin"
 name = "thorax"
 dynamic = ["version"]
 description = "Native Python SDK for Thorax: secrets management for humans, agents, and apps."
+readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.9"
 classifiers = [

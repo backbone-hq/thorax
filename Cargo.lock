@@ -3432,7 +3432,7 @@ dependencies = [
 
 [[package]]
 name = "thorax"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -3448,7 +3448,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-bench"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "thorax-core",
  "thorax-crypto",
@@ -3456,7 +3456,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-cli"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "clap_complete",
@@ -3474,7 +3474,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-core"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "cord",
  "serde",
@@ -3483,7 +3483,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-crypto"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "chacha20poly1305",
  "cord",
@@ -3500,7 +3500,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-frontend"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "bech32",
  "clap",
@@ -3513,7 +3513,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-keychain"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "argon2",
  "chacha20poly1305",
@@ -3531,7 +3531,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-kubernetes-api"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "base64",
  "cord",
@@ -3548,7 +3548,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-kubernetes-controller"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "futures",
@@ -3573,7 +3573,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-node"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "cord",
  "napi",
@@ -3585,7 +3585,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-ops"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "cord",
  "serde",
@@ -3599,7 +3599,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-py"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "cord",
  "pyo3",
@@ -3609,7 +3609,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-run"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "thorax-frontend",
@@ -3618,7 +3618,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-sdk"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "tempfile",
  "thiserror 1.0.69",
@@ -3628,7 +3628,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-store"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "cord",
  "fs2",
@@ -3642,7 +3642,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-tui"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "crossterm",
  "nucleo-matcher",
@@ -3657,7 +3657,7 @@ dependencies = [
 
 [[package]]
 name = "thorax-update"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "cord",
  "ed25519-dalek",

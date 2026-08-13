@@ -47,7 +47,7 @@ Linux and macOS:
 
 <!-- BEGIN PINNED INSTALL: regenerated for each release; do not edit by hand -->
 ```sh
-f="$(mktemp)" && curl -fsSL -o "$f" "https://github.com/backbone-hq/thorax/releases/download/v1.0.0/install.sh" && echo "28dc907a9c1ed85daa23b778a38caf4b07ae8cfe31aba41ad73c014d587a50b5  $f" | { command -v sha256sum >/dev/null && sha256sum -c - || shasum -a 256 -c -; } && THORAX_VERSION=v1.0.0 sh "$f"
+f="$(mktemp)" && curl -fsSL -o "$f" "https://github.com/backbone-hq/thorax/releases/download/vX.Y.Z/install.sh" && echo "<sha256 from the GitHub Release notes>  $f" | { command -v sha256sum >/dev/null && sha256sum -c - || shasum -a 256 -c -; } && THORAX_VERSION=vX.Y.Z sh "$f"
 ```
 <!-- END PINNED INSTALL -->
 
@@ -227,6 +227,10 @@ The TUI provides a visual conflict tree where authorized users can compare decry
 
 Run `thorax` with no arguments to open a keyboard-driven control plane over the vault.
 
+![Browse secrets and inspect effective access in the Thorax TUI](./media/tui-secrets.svg)
+
+*Browse secrets by selector, inspect metadata and effective access, and reveal values only when needed.*
+
 The TUI can:
 
 - Initialize a vault or claim an invite
@@ -236,6 +240,10 @@ The TUI can:
 - Invite users and administer access
 - Show vault health and validation failures
 - Compare and resolve concurrent edits and suspected rollbacks
+
+![Manage groups and grants in the Thorax TUI](./media/tui-groups.svg)
+
+*Manage groups, memberships, and grants from the same vault.*
 
 Revealed primary values remask automatically, copied values are cleared from the clipboard on a timer, and the session relocks after inactivity or on command. The TUI also notices external vault changes, such as a Git pull, and reloads its verified view.
 

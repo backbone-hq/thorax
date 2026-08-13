@@ -50,9 +50,16 @@ grep -Fq 'expected_ref="refs/tags/v$REQUESTED_VERSION"' .github/workflows/releas
   || fail "release workflow is not bound to its version tag"
 grep -Fq 'build-${{ github.run_id }}' .github/workflows/release-artifacts.yml \
   || fail "controller image does not use a retry-safe run-scoped staging tag"
-if grep -Eq 'promote-controller-image:|imagetools create|thorax-kubernetes-controller:\$\{\{ inputs\.version \}\}' \
+if grep -Eq 'promote-controller-image:|thorax-kubernetes-controller:\$\{\{ inputs\.version \}\}' \
   .github/workflows/release-artifacts.yml; then
   fail "public CI may stage controller images but may not publish a versioned GHCR image"
+fi
+grep -Fq 'STAGING_IMAGE: ghcr.io/backbone-hq/thorax-kubernetes-controller:build-${{ github.run_id }}' \
+  .github/workflows/release-artifacts.yml \
+  || fail "controller manifest assembly does not target a run-scoped staging image"
+if grep -F 'imagetools create' .github/workflows/release-artifacts.yml \
+    | grep -Fqv -- '--tag "$STAGING_IMAGE"'; then
+  fail "public CI may assemble only the run-scoped controller staging image"
 fi
 if grep -Fq 'gh release ' .github/workflows/release-artifacts.yml; then
   fail "public CI may not create or mutate GitHub Releases"

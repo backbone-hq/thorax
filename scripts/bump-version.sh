@@ -57,6 +57,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tomllib
 
 root = pathlib.Path(sys.argv[1])
 expected = sys.argv[2]
@@ -136,6 +137,26 @@ else:
             errors.append(
                 f'workspace package {package["name"]} is {package["version"]}, expected {expected}'
             )
+
+    try:
+        lock_document = tomllib.loads((root / "Cargo.lock").read_text())
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        errors.append(f"Cargo.lock is unreadable: {error}")
+    else:
+        lock_workspace = {
+            package["name"]: package
+            for package in lock_document.get("package", [])
+            if "source" not in package
+        }
+        for package in packages:
+            locked = lock_workspace.get(package["name"])
+            if locked is None:
+                errors.append(f'Cargo.lock is missing workspace package {package["name"]}')
+            elif locked.get("version") != expected:
+                errors.append(
+                    f'Cargo.lock workspace package {package["name"]} is '
+                    f'{locked.get("version", "missing")}, expected {expected}'
+                )
 
 if errors:
     for error in errors:
@@ -245,7 +266,7 @@ temporary.chmod(path.stat().st_mode)
 temporary.replace(path)
 PY
 
-( cd "$ROOT" && cargo metadata --no-deps --format-version 1 >/dev/null )
+( cd "$ROOT" && cargo check --workspace --all-targets --offline >/dev/null )
 "$SELF" --check "$next"
 
 completed=1
