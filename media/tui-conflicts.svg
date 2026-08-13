@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1046" height="644" viewBox="0 0 1046 644">
+<rect width="100%" height="100%" rx="10" fill="#111214"/>
+<style>text { font-family: "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: 14px; font-variant-ligatures: none; }</style>
+<rect x="903.25" y="16" width="126.75" height="18" fill="#ff4a3e"/>
+<rect x="32.9" y="88" width="371.8" height="18" fill="#383838"/>
+<text x="16" y="30.039999" fill="#ffb226" font-weight="700" xml:space="preserve">THORAX</text>
+<text x="66.7" y="30.039999" fill="#383838" font-weight="400" xml:space="preserve">  ╱  </text>
+<text x="108.95" y="30.039999" fill="#d4d4d4" font-weight="400" xml:space="preserve">@atlas</text>
+<text x="159.65" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> a71a5c0d</text>
+<text x="235.7" y="30.039999" fill="#383838" font-weight="400" xml:space="preserve">  ╱  </text>
+<text x="277.94998" y="30.039999" fill="#d4d4d4" font-weight="400" xml:space="preserve">@ava</text>
+<text x="311.75" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> a7a00001</text>
+<text x="573.7" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> [1] Secrets </text>
+<text x="692" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> [2] Users </text>
+<text x="793.39996" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> [3] Groups </text>
+<text x="903.25" y="30.039999" fill="#ffffff" font-weight="700" xml:space="preserve"> [4] Conflicts </text>
+<text x="16" y="66.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">┌</text>
+<text x="24.45" y="66.04" fill="#ff4a3e" font-weight="700" xml:space="preserve"> 1 unresolved conflict(s) </text>
+<text x="244.15" y="66.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">────────────────────┐</text>
+<text x="421.59998" y="66.04" fill="#707070" font-weight="400" xml:space="preserve">┌ candidate ───────────────────────────────────────────────────────────┐</text>
+<text x="16" y="84.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="32.9" y="84.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">▾ </text>
+<text x="49.8" y="84.04" fill="#d4d4d4" font-weight="700" xml:space="preserve">services/payments/webhook</text>
+<text x="261.05" y="84.04" fill="#c98a2a" font-weight="400" xml:space="preserve">  secret</text>
+<text x="328.65" y="84.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="354" y="84.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">tie</text>
+<text x="413.15" y="84.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">selector  </text>
+<text x="523" y="84.04" fill="#d4d4d4" font-weight="400" xml:space="preserve">services/payments/webhook                                  </text>
+<text x="1021.55" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="102.03999" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="66.7" y="102.03999" fill="#ff4a3e" font-weight="700" xml:space="preserve">● </text>
+<text x="83.6" y="102.03999" fill="#d4d4d4" font-weight="700" xml:space="preserve">set (61 bytes)                        </text>
+<text x="413.15" y="102.03999" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="102.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="102.03999" fill="#707070" font-weight="400" xml:space="preserve">labels    </text>
+<text x="523" y="102.03999" fill="#d4d4d4" font-weight="400" xml:space="preserve">—                                                          </text>
+<text x="1021.55" y="102.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="120.03999" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="66.7" y="120.03999" fill="#ff4a3e" font-weight="400" xml:space="preserve">● </text>
+<text x="83.6" y="120.03999" fill="#d4d4d4" font-weight="400" xml:space="preserve">set (61 bytes)                         </text>
+<text x="413.15" y="120.03999" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="120.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="120.03999" fill="#707070" font-weight="400" xml:space="preserve">content   </text>
+<text x="523" y="120.03999" fill="#d4d4d4" font-weight="400" xml:space="preserve">61 bytes (sealed)                                          </text>
+<text x="1021.55" y="120.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="138.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="138.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="138.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="138.04" fill="#707070" font-weight="400" xml:space="preserve">sealed to </text>
+<text x="523" y="138.04" fill="#d4d4d4" font-weight="400" xml:space="preserve">@ava</text>
+<text x="556.8" y="138.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="582.14996" y="138.04" fill="#d4d4d4" font-weight="400" xml:space="preserve">@release-bot                                        </text>
+<text x="1021.55" y="138.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="156.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="156.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="156.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="156.04" fill="#707070" font-weight="400" xml:space="preserve">signed by </text>
+<text x="523" y="156.04" fill="#d4d4d4" font-weight="400" xml:space="preserve">@ava                                                       </text>
+<text x="1021.55" y="156.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="174.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="174.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="174.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="174.04" fill="#707070" font-weight="400" xml:space="preserve">counter   </text>
+<text x="523" y="174.04" fill="#d4d4d4" font-weight="400" xml:space="preserve">27                                                         </text>
+<text x="1021.55" y="174.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="192.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="192.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="192.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="192.04" fill="#707070" font-weight="400" xml:space="preserve">record    </text>
+<text x="523" y="192.04" fill="#d4d4d4" font-weight="400" xml:space="preserve">c0ffee01                                                   </text>
+<text x="1021.55" y="192.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="210.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="210.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="210.04" fill="#707070" font-weight="400" xml:space="preserve">└──────────────────────────────────────────────────────────────────────┘</text>
+<text x="16" y="228.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="228.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="228.04" fill="#707070" font-weight="400" xml:space="preserve">┌ access ──────────────────────────────────────────────────────────────┐</text>
+<text x="16" y="246.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="246.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="246.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="246.04" fill="#707070" font-weight="400" xml:space="preserve">principal                                   read    write   manage</text>
+<text x="1021.55" y="246.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="264.03998" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="264.03998" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="264.03998" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="430.05" y="264.03998" fill="#d4d4d4" font-weight="400" xml:space="preserve"> @ava                                        </text>
+<text x="810.3" y="264.03998" fill="#ffb226" font-weight="400" xml:space="preserve">✓       ✓       ✓       </text>
+<text x="1021.55" y="264.03998" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="282.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="282.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="282.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="430.05" y="282.04" fill="#d4d4d4" font-weight="400" xml:space="preserve"> @release-bot                                </text>
+<text x="810.3" y="282.04" fill="#ffb226" font-weight="400" xml:space="preserve">✓       </text>
+<text x="877.89996" y="282.04" fill="#707070" font-weight="400" xml:space="preserve">·       ·       </text>
+<text x="1021.55" y="282.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="300.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="300.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="300.04" fill="#707070" font-weight="400" xml:space="preserve">└──────────────────────────────────────────────────────────────────────┘</text>
+<text x="16" y="318.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="318.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="318.04" fill="#ffb226" font-weight="400" xml:space="preserve">┌ value ───────────────────────────────────────────────────────────────┐</text>
+<text x="16" y="336.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="336.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="336.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="336.04" fill="#707070" font-weight="400" xml:space="preserve">press r to reveal this conflict's values (all candidates, one</text>
+<text x="1021.55" y="336.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="354.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="354.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="354.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
+<text x="438.5" y="354.04" fill="#707070" font-weight="400" xml:space="preserve">countdown)</text>
+<text x="1021.55" y="354.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="372.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="372.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="372.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
+<text x="1021.55" y="372.04" fill="#ffb226" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="390.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="390.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="421.59998" y="390.04" fill="#ffb226" font-weight="400" xml:space="preserve">└──────────────────────────────────────────────────────────────────────┘</text>
+<text x="16" y="408.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="408.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="426.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="426.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="444.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="444.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="462.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="462.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="480.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="480.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="498.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="498.04" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="516.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="516.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="534.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="534.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="552.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="413.15" y="552.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">│</text>
+<text x="16" y="570.04004" fill="#ff4a3e" font-weight="400" xml:space="preserve">└──────────────────────────────────────────────┘</text>
+<text x="24.45" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ Reveal ]</text>
+<text x="117.399994" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ Resolve ]</text>
+<text x="16" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">↑↓ move</text>
+<text x="75.149994" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="100.5" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">r reveal</text>
+<text x="168.09999" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="193.45" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">Enter resolve candidate</text>
+<text x="387.8" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="413.15" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">then: git add the vault</text>
+<text x="607.5" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="632.85" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">? help</text>
+<text x="683.55" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="708.89996" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">q quit</text>
+<text x="869.44995" y="624.04" fill="#ffb226" font-weight="700" xml:space="preserve">VERIFIED</text>
+<text x="937.05" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="962.39996" y="624.04" fill="#ffb226" font-weight="700" xml:space="preserve">UNLOCKED</text>
+</svg>

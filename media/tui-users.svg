@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1046" height="644" viewBox="0 0 1046 644">
 <rect width="100%" height="100%" rx="10" fill="#111214"/>
 <style>text { font-family: "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: 14px; font-variant-ligatures: none; }</style>
-<rect x="928.6" y="16" width="101.399994" height="18" fill="#ffb226"/>
+<rect x="827.19995" y="16" width="92.95" height="18" fill="#ffb226"/>
 <rect x="32.9" y="88" width="980.19995" height="18" fill="#383838"/>
 <text x="16" y="30.039999" fill="#ffb226" font-weight="700" xml:space="preserve">THORAX</text>
 <text x="66.7" y="30.039999" fill="#383838" font-weight="400" xml:space="preserve">  ╱  </text>
@@ -11,36 +11,36 @@
 <text x="277.94998" y="30.039999" fill="#d4d4d4" font-weight="400" xml:space="preserve">@ava</text>
 <text x="311.75" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> a7a00001</text>
 <text x="708.89996" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> [1] Secrets </text>
-<text x="827.19995" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> [2] Users </text>
-<text x="928.6" y="30.039999" fill="#ffffff" font-weight="700" xml:space="preserve"> [3] Groups </text>
-<text x="16" y="66.04" fill="#707070" font-weight="400" xml:space="preserve">┌ groups ──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐</text>
+<text x="827.19995" y="30.039999" fill="#ffffff" font-weight="700" xml:space="preserve"> [2] Users </text>
+<text x="928.6" y="30.039999" fill="#707070" font-weight="400" xml:space="preserve"> [3] Groups </text>
+<text x="16" y="66.04" fill="#707070" font-weight="400" xml:space="preserve">┌ users ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┐</text>
 <text x="16" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="24.45" y="84.04" fill="#d4d4d4" font-weight="400" xml:space="preserve"> ▸ </text>
-<text x="49.8" y="84.04" fill="#d4d4d4" font-weight="700" xml:space="preserve">%deployments        </text>
-<text x="218.79999" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">1 grant(s)</text>
-<text x="303.3" y="84.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
-<text x="328.65" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">1 member(s)</text>
+<text x="49.8" y="84.04" fill="#d4d4d4" font-weight="700" xml:space="preserve">@ava                </text>
+<text x="218.79999" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">root</text>
+<text x="252.59999" y="84.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
+<text x="277.94998" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">1 grant(s)</text>
 <text x="1021.55" y="84.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="102.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="32.9" y="102.03999" fill="#d4d4d4" font-weight="700" xml:space="preserve">▾ </text>
-<text x="49.8" y="102.03999" fill="#d4d4d4" font-weight="700" xml:space="preserve">%developers         </text>
+<text x="49.8" y="102.03999" fill="#d4d4d4" font-weight="700" xml:space="preserve">@maya               </text>
 <text x="218.79999" y="102.03999" fill="#707070" font-weight="700" xml:space="preserve">2 grant(s)</text>
-<text x="303.3" y="102.03999" fill="#383838" font-weight="700" xml:space="preserve"> ╱ </text>
-<text x="328.65" y="102.03999" fill="#707070" font-weight="700" xml:space="preserve">2 member(s)</text>
 <text x="1021.55" y="102.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="120.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="66.7" y="120.03999" fill="#ffb226" font-weight="400" xml:space="preserve">read      </text>
-<text x="151.2" y="120.03999" fill="#d4d4d4" font-weight="400" xml:space="preserve">app/* (and everything under)                                                                           </text>
+<text x="151.2" y="120.03999" fill="#d4d4d4" font-weight="400" xml:space="preserve">app/production/* (and everything under)                                                                </text>
 <text x="1021.55" y="120.03999" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="138.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="66.7" y="138.04" fill="#ffb226" font-weight="400" xml:space="preserve">write     </text>
 <text x="151.2" y="138.04" fill="#d4d4d4" font-weight="400" xml:space="preserve">app/staging/* (and everything under)                                                                   </text>
 <text x="1021.55" y="138.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="156.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
-<text x="66.7" y="156.04" fill="#707070" font-weight="400" xml:space="preserve">member @ava</text>
+<text x="66.7" y="156.04" fill="#707070" font-weight="400" xml:space="preserve">in group %developers</text>
 <text x="1021.55" y="156.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="174.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
-<text x="66.7" y="174.04" fill="#707070" font-weight="400" xml:space="preserve">member @maya</text>
+<text x="24.45" y="174.04" fill="#d4d4d4" font-weight="400" xml:space="preserve"> ▸ </text>
+<text x="49.8" y="174.04" fill="#d4d4d4" font-weight="700" xml:space="preserve">@release-bot        </text>
+<text x="218.79999" y="174.04" fill="#707070" font-weight="400" xml:space="preserve">1 grant(s)</text>
 <text x="1021.55" y="174.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="16" y="192.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
 <text x="1021.55" y="192.04" fill="#707070" font-weight="400" xml:space="preserve">│</text>
@@ -87,10 +87,9 @@
 <text x="16" y="570.04004" fill="#707070" font-weight="400" xml:space="preserve">└ ↵/→ expand</text>
 <text x="117.399994" y="570.04004" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
 <text x="142.75" y="570.04004" fill="#707070" font-weight="400" xml:space="preserve">grants shown below each ────────────────────────────────────────────────────────────────────────────────┘</text>
-<text x="24.45" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ + Group ]</text>
-<text x="125.85" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ + Grant ]</text>
-<text x="227.25" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ + Member ]</text>
-<text x="337.1" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ Delete ]</text>
+<text x="24.45" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ + Invite ]</text>
+<text x="134.29999" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ + Grant ]</text>
+<text x="235.7" y="588.04004" fill="#ffb226" font-weight="400" xml:space="preserve">[ Delete ]</text>
 <text x="16" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">↑↓ move</text>
 <text x="75.149994" y="624.04" fill="#383838" font-weight="400" xml:space="preserve"> ╱ </text>
 <text x="100.5" y="624.04" fill="#707070" font-weight="400" xml:space="preserve">→ expand</text>

@@ -398,7 +398,7 @@ pub fn build_access(state: &EffectiveState) -> AccessModel {
     };
 
     let grants_for = |subject_is: &dyn Fn(&PrincipalRefV1) -> bool| -> Vec<AccessGrant> {
-        state
+        let mut grants: Vec<_> = state
             .grants
             .values()
             .filter(|g: &&GrantRecordV1| subject_is(&g.subject_id))
@@ -410,7 +410,13 @@ pub fn build_access(state: &EffectiveState) -> AccessModel {
                     keyspace,
                 }
             })
-            .collect()
+            .collect();
+        grants.sort_by(|a, b| {
+            a.class
+                .cmp(&b.class)
+                .then_with(|| a.keyspace.cmp(&b.keyspace))
+        });
+        grants
     };
 
     let mut users = Vec::new();
@@ -428,12 +434,13 @@ pub fn build_access(state: &EffectiveState) -> AccessModel {
         grants.extend(grants_for(
             &|p| matches!(p, PrincipalRefV1::User(x) if *x == u),
         ));
-        let group_memberships = state
+        let mut group_memberships: Vec<_> = state
             .memberships
             .values()
             .filter(|m| matches!(&m.member_id, PrincipalRefV1::User(x) if x == user))
             .map(|m| group_name(&m.group_id))
             .collect();
+        group_memberships.sort();
         users.push(AccessUser {
             user_id: user.clone(),
             handle: handle_for.get(user).cloned(),
@@ -448,12 +455,13 @@ pub fn build_access(state: &EffectiveState) -> AccessModel {
     for (group_id, record) in &state.groups {
         let gid = group_id.clone();
         let grants = grants_for(&|p| matches!(p, PrincipalRefV1::Group(x) if *x == gid));
-        let members = state
+        let mut members: Vec<_> = state
             .memberships
             .values()
             .filter(|m| &m.group_id == group_id)
             .map(|m| principal_label(&m.member_id))
             .collect();
+        members.sort();
         groups.push(AccessGroup {
             group_id: group_id.clone(),
             handle: record.handle.clone(),
@@ -701,16 +709,16 @@ pub fn build_merge(
                     "content".into(),
                     format!("{} bytes (sealed)", record.sealed.ciphertext.len()),
                 ));
-                details.push((
-                    "sealed to".into(),
-                    record
+                details.push(("sealed to".into(), {
+                    let mut recipients: Vec<_> = record
                         .sealed
                         .recipient_slots
                         .iter()
                         .map(|slot| user_label(&slot.recipient_id))
-                        .collect::<Vec<_>>()
-                        .join(" ╱ "),
-                ));
+                        .collect();
+                    recipients.sort();
+                    recipients.join(" ╱ ")
+                }));
                 decryptable = match acting {
                     Some(user) => {
                         state.authority_for_user(user).can_read(&record.selector)

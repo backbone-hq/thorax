@@ -10,7 +10,6 @@ use crate::app::{
 use crate::event::map_key;
 use crate::project;
 
-#[path = "../../../tools/tui-screenshots/generate.rs"]
 mod screenshot_tool;
 
 fn key(code: KeyCode) -> KeyEvent {

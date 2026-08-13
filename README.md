@@ -1,4 +1,4 @@
-# ![Thorax](./media/banner.svg)
+# ![Browse secrets and inspect effective access in the Thorax TUI](./media/tui-secrets.svg)
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/backbone-hq/thorax/ci.yml?branch=master)
 ![GitHub License](https://img.shields.io/github/license/backbone-hq/thorax)
@@ -227,10 +227,6 @@ The TUI provides a visual conflict tree where authorized users can compare decry
 
 Run `thorax` with no arguments to open a keyboard-driven control plane over the vault.
 
-![Browse secrets and inspect effective access in the Thorax TUI](./media/tui-secrets.svg)
-
-*Browse secrets by selector, inspect metadata and effective access, and reveal values only when needed.*
-
 The TUI can:
 
 - Initialize a vault or claim an invite
@@ -241,9 +237,27 @@ The TUI can:
 - Show vault health and validation failures
 - Compare and resolve concurrent edits and suspected rollbacks
 
+### Edit secrets
+
+![Edit a secret in memory in the Thorax TUI](./media/tui-editor.svg)
+
+*Edit UTF-8 values in memory, then save them as a new encrypted record.*
+
+### Manage access
+
+![Inspect users and their grants in the Thorax TUI](./media/tui-users.svg)
+
+*Inspect each user's direct grants and group memberships.*
+
 ![Manage groups and grants in the Thorax TUI](./media/tui-groups.svg)
 
 *Manage groups, memberships, and grants from the same vault.*
+
+### Resolve conflicts
+
+![Compare conflicting secret candidates in the Thorax TUI](./media/tui-conflicts.svg)
+
+*Compare signed candidates and explicitly choose the value that should become effective.*
 
 Revealed primary values remask automatically, copied values are cleared from the clipboard on a timer, and the session relocks after inactivity or on command. The TUI also notices external vault changes, such as a Git pull, and reloads its verified view.
 
@@ -385,4 +399,4 @@ Thorax is licensed under the [Apache License 2.0](./LICENSE).
 
 ---
 
-Thorax is Backbone's stored layer: where secrets live once [Cord](https://github.com/backbone-hq/cord) defines how they serialize. Built by [Backbone](https://backbone.dev).
+Built by [Backbone](https://backbone.dev).
