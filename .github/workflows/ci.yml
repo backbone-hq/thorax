@@ -46,7 +46,7 @@ jobs:
           diff -u deploy/charts/thorax-kubernetes-controller/crds/thorax.backbone.dev.yaml /tmp/thorax-crds.yaml
 
       - name: Lint Kubernetes controller chart
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v3.20.0
 
@@ -89,7 +89,7 @@ jobs:
           toolchain: 1.92.0
 
       - name: Install Helm
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v3.20.0
 
