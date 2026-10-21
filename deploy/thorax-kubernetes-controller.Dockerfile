@@ -3,7 +3,7 @@
 # Pin the complete multi-platform builder manifest. The official Alpine Rust image
 # builds for the native musl target, producing a static controller for both amd64 and
 # arm64. The builder never enters the shipped image.
-FROM docker.io/library/rust:1.92.0-alpine3.23@sha256:f6c22e0a256c05d44fca23bf530120b5d4a6249a393734884281ca80782329bc AS builder
+FROM docker.io/library/rust:1.99.1-alpine3.23@sha256:96e773beb97c24572dcc462458cf84776fddc347302b9ab732a6b98b7822ad38 AS builder
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY crates ./crates
